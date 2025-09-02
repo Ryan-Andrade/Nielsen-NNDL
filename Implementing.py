@@ -92,3 +92,27 @@ def update_mini_batch(self , mini_batch , learning_rate):
     self.weights = [w-(learning_rate/len(mini_batch))*weight_gradient_slope for w, weight_gradient_slope in zip(self.weights ,
         batch_total_w_grads)]
     self.biases = [b-(learning_rate/len(mini_batch))*bias_gradient_slope for b, bias_gradient_slope in zip(self.biases , batch_total_b_grads)]
+# TODO: replace spaces with tabs for proper indentation
+def backprop (self , input_data, target_value):
+    batch_total_b_grads = [np. zeros (b. shape ) for b in self . biases ]
+    batch_total_w_grads = [np. zeros (w. shape ) for w in self . weights ]
+    # feedforward
+    activation = input_data
+    activations = [input_data] # list to store all the activations , layer by layer
+    zs = [] # list to store all the z vectors , layer by layer
+    for b, w in zip( self .biases , self . weights ):
+        z=np. dot (w, activation )+b
+        zs. append (z)
+        activation = sigmoid (z)
+        activations . append ( activation )
+    # backward pass
+    delta = self . cost_derivative ( activations [-1], target_value) * sigmoid_prime (zs [ -1])
+    batch_total_b_grads [ -1] = delta
+    batch_total_w_grads [ -1] = np.dot(delta , activations [ -2]. transpose ())
+    for l in xrange (2, self . num_layers ):
+        z = zs[-l]
+        sp = sigmoid_prime (z)
+        delta = np.dot( self . weights [-l +1]. transpose () , delta ) * sp
+        batch_total_b_grads [-l] = delta
+        batch_total_w_grads [-l] = np.dot(delta , activations [-l -1]. transpose ())
+    return ( batch_total_b_grads , batch_total_w_grads )
