@@ -93,16 +93,22 @@ def update_mini_batch(self , mini_batch , learning_rate):
         batch_total_w_grads)]
     self.biases = [b-(learning_rate/len(mini_batch))*bias_gradient_slope for b, bias_gradient_slope in zip(self.biases , batch_total_b_grads)]
 # TODO: replace spaces with tabs for proper indentation
-def compute_gradients (self , input_data, target_value):
+def compute_gradients (self , input_layer, target_value):
     batch_total_b_grads = [np. zeros (b. shape ) for b in self . biases ]
     batch_total_w_grads = [np. zeros (w. shape ) for w in self . weights ]
-    # This is the beginning of the forward pass.
-    # Set activation equal to input data to calculate the activations for
-    # the first layer.
-    activation = input_data
-    activations = [input_data] # list to store all the activations , layer by layer
-    zs = [] # list to store all the z vectors , layer by layer
+    # This is the beginning of the forward pass. The input layer, is given to the for loop to calculate the activations for
+    # the first hidden layer. Hence, why we set activation equal to the input layer.
+    activation = input_layer
+    # List to store activations, layer by layer. Here it is clear that
+    # input_data is what is received by the first layer, rather than actual activations.
+    activations = [input_layer]
+    # List to store all the z vectors, layer by layer.
+    zs = []
+    
     for b, w in zip( self .biases , self . weights ):
+        # the dot product accepts a matrix of weights and multiplies each row in the matrix
+        #  by the activation vector, then it adds the products (columns) of each row together.
+        # the bias vector is then added to each neuron in the layer.
         z=np. dot (w, activation )+b
         zs. append (z)
         activation = sigmoid (z)
