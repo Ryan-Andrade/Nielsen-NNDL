@@ -93,10 +93,12 @@ def update_mini_batch(self , mini_batch , learning_rate):
         batch_total_w_grads)]
     self.biases = [b-(learning_rate/len(mini_batch))*bias_gradient_slope for b, bias_gradient_slope in zip(self.biases , batch_total_b_grads)]
 # TODO: replace spaces with tabs for proper indentation
-def backprop (self , input_data, target_value):
+def compute_gradients (self , input_data, target_value):
     batch_total_b_grads = [np. zeros (b. shape ) for b in self . biases ]
     batch_total_w_grads = [np. zeros (w. shape ) for w in self . weights ]
-    # feedforward
+    # This is the beginning of the forward pass.
+    # Set activation equal to input data to calculate the activations for
+    # the first layer.
     activation = input_data
     activations = [input_data] # list to store all the activations , layer by layer
     zs = [] # list to store all the z vectors , layer by layer
