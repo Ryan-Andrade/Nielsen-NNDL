@@ -71,16 +71,24 @@ def SGD(self , training_data , epochs , mini_batch_size , learning_rate, test_da
         print "Epoch {0} complete".format(j)
 
 def update_mini_batch(self , mini_batch , learning_rate):
-    # Create a vector full of zeros in the same shape as the biases in the network.
-    bias_gradients = [np.zeros(b.shape) for b in self.biases]
-    # Create a matrix full of zeros in the same shape as the weights in the network.
-    weight_gradients = [np.zeros(w.shape) for w in self.weights]
+    # Create a list full of vectors containing zero values in the same shape as 
+    # the biases in the network, (bias => vector => layer => list).
+    batch_total_b_grads = [np.zeros(b.shape) for b in self.biases]
+    # Create a list full of matrices containing zero values in the same shape as 
+    # the weights in the network, (inputs => weights => neuron => matrix => layer => list).
+    batch_total_w_grads = [np.zeros(w.shape) for w in self.weights]
     for input_data, target_value in mini_batch:
         # call the backprop function (defined later) and pass in the input data and target value.
-        # for each training example, this returns the gradient for the cost function.
-        b_gradient , w_gradient = self.backprop(input_data, target_value)
-        bias_gradients = [nb+dnb for nb, dnb in zip(bias_gradients , b_gradient)]
-        weight_gradients = [nw+dnw for nw, dnw in zip(weight_gradients , w_gradient)]
-    self.weights = [w-(learning_rate/len(mini_batch))*nw for w, nw in zip(self.weights ,
-        weight_gradients)]
-    self.biases = [b-(learning_rate/len(mini_batch))*nb for b, nb in zip(self.biases , bias_gradients)]
+        # for each training example, this returns the gradient slope for every variable in the network
+        # in the same shape as its respective list defined above.
+        example_b_gradients , example_w_gradients = self.backprop(input_data, target_value)
+        # once you receive this example's gradients, match them with the list and add each gradient to
+        # its area of the list (network proxy) to create a running total of the gradients for the mini-batch.
+        batch_total_b_grads = [example_b_grads+batch_sum_b_grads for example_b_grads, batch_sum_b_grads in zip(batch_total_b_grads , example_b_gradients)]
+        batch_total_w_grads = [example_w_grads+batch_sum_w_grads for example_w_grads, batch_sum_w_grads in zip(batch_total_w_grads , example_w_gradients)]
+    # subtract each variable in the network by the learning rate, divided by the length of the mini-batch,
+    # multiplied by the corresponding variable's gradient slope in the batch total list. 
+    # Then reassign the network's variable to this new value.
+    self.weights = [w-(learning_rate/len(mini_batch))*weight_gradient_slope for w, weight_gradient_slope in zip(self.weights ,
+        batch_total_w_grads)]
+    self.biases = [b-(learning_rate/len(mini_batch))*bias_gradient_slope for b, bias_gradient_slope in zip(self.biases , batch_total_b_grads)]
