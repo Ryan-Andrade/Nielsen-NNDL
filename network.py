@@ -44,40 +44,19 @@ net = Network([2, 3, 1])
 # Test to see its weights & biases
 print(net.weights)
 print(net.biases)
-    
-# create a stochastic gradient descent function. 
-# Training data is a list of tuples (x,y) representing the training inputs (x) and the target values (y).
-# Test data is optional.
-def SGD(self , training_data , epochs , mini_batch_size , learning_rate, test_data=None):
-    if test_data:
-        n_test = len(test_data)
-        n = len(training_data)
-    # for the argument (#) passed in for epochs, iterate through that many times.
-    for j in xrange(epochs):
-        random.shuffle(training_data)
-        # set mini batches equal to slices of the training data based on the size set out in the argument.
-        # k iterates from 0 to n (the length of the training data) in steps of mini_batch_size.
-        mini_batches = [training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
-        for mini_batch in mini_batches:
-            # calls the update_mini_batch function (defined next) to update the weights and biases
-            #  of the network by the learning rate.
-            self.update_mini_batch(mini_batch , learning_rate)
-    if test_data:
-        # if you decide to check the model's performance by including test data write a message to report 
-        # how many test inputs the network got correct, (evaluate function defined later), after each training epoch. 
-        print "Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test)
-    else:
-        # During training, print the epoch.
-        print "Epoch {0} complete".format(j)
 
-# Define a sigmoid function. z is a vector or matrix of weighted inputs
-# depending on if you're updating your model one at a time or in batches.
+# Define a sigmoid function that introduces non-linearity to the network.
+# z is the pre-activation value: the linear combination of: inputs, weights, activations, and bias. 
+# For a single neuron z is a scalar; for a layer of neurons it's a NumPy array. 
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
+# Compute the gradients of the cost function with respect to each weight and bias. 
+# These gradients indicate how each parameter should be adjusted to reduce the cost 
+# (and thereby improve the network's accuracy when used in training updates).
 def compute_gradients (self , input_layer, target_value):
-    batch_total_b_grads = [np. zeros (b. shape ) for b in self . biases ]
-    batch_total_w_grads = [np. zeros (w. shape ) for w in self . weights ]
+    batch_total_b_grads = [np.zeros (b.shape ) for b in self.biases]
+    batch_total_w_grads = [np.zeros (w.shape ) for w in self.weights]
     # This is the beginning of the forward pass. The input layer, is given to the for loop to calculate the activations for
     # the first hidden layer. Hence, why we set activation equal to the input layer.
     activation = input_layer
@@ -87,7 +66,7 @@ def compute_gradients (self , input_layer, target_value):
     # List to store all the z vectors, layer by layer.
     zs = []
     
-    for b, w in zip( self .biases , self . weights ):
+    for b, w in zip( self.biases , self.weights ):
         # the dot product accepts a matrix of weights and multiplies each row in the matrix
         #  by the activation vector, then it adds the products (columns) of each row together.
         # the bias vector is then added to each neuron in the layer.
@@ -107,6 +86,8 @@ def compute_gradients (self , input_layer, target_value):
         batch_total_w_grads [-l] = np.dot(delta , activations [-l -1]. transpose ())
     return ( batch_total_b_grads , batch_total_w_grads )
 
+# Model training will employ sequential updates to the weights and biases using mini-batches of training data.
+# This function will update the network's weights and biases.
 def update_mini_batch(self , mini_batch , learning_rate):
     # Create a list full of vectors containing zero values in the same shape as 
     # the biases in the network, (bias => vector => layer => list). This list will hold
@@ -131,6 +112,47 @@ def update_mini_batch(self , mini_batch , learning_rate):
     # bias vector = entire layer
     self.biases = [bias_vector-(learning_rate/len(mini_batch))*bias_gradient_vector for bias_vector, bias_gradient_vector in zip(self.biases , batch_total_b_grads)]
 
+def evaluate(self, test_data):
+    """Return the number of test inputs for which the neural
+    network outputs the correct result. Note that the neural
+    network's output is assumed to be the index of whichever
+    neuron in the final layer has the highest activation."""
+    test_results = [(np.argmax(self.feedforward(x)), y)
+                    for (x, y) in test_data]
+    return sum(int(x == y) for (x, y) in test_results)
+
+# This is the core method to train the neural network using mini-batch stochastic gradient descent. 
+# It accepts the tunable hyperparameters and calls the other functions we defined above. 
+# Training data is a list of tuples (x, y) representing the training inputs (x) 
+# and the target values (y). Test data is optional.
+def SGD(self , training_data , epochs , mini_batch_size , learning_rate, test_data=None):
+    if test_data:
+        n_test = len(test_data)
+        n = len(training_data)
+    # epochs is passed as an integer. xrange converts the integer into an iterable object. 
+    # j then takes on each integer (0 to epochs-1) to track which epoch the network is on, 
+    # and is later used in print statements to report training progress.
+    for j in xrange(epochs):
+        # At the start of each epoch, shuffle the entire training set so that mini-batches 
+        # are formed from different groupings each time. This prevents the network from 
+        # picking up false patterns from the fixed order of the data.
+        random.shuffle(training_data)
+        # set mini_batches equal to a list comprised of slices of the training data 
+        # based on the size set out in the argument. 
+        # k iterates from 0 to n (the length of the training data) in steps of mini_batch_size.
+        mini_batches = [training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
+        for mini_batch in mini_batches:
+            # call the update_mini_batch function to update the weights and biases
+            # of the network by the learning rate.
+            self.update_mini_batch(mini_batch , learning_rate)
+    if test_data:
+        # Including test data calls the evaluate function to create a running tally of model performance per epoch.
+        # This drastically slows down training, so only include it if you need to see progress. 
+        print "Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test)
+    else:
+        # During training, print the epoch.
+        print "Epoch {0} complete".format(j)
+
 # create a function that sends an input vector 'a' through the network and returns the output vector.
 def feedforward(self , a):
     # Iterate through the hidden and output layers in the network and pair the weight matrix with the bias vector using zip.
@@ -140,11 +162,3 @@ def feedforward(self , a):
         a = sigmoid(np.dot(w, a)+b)
         return a
 
- def evaluate(self, test_data):
-        """Return the number of test inputs for which the neural
-        network outputs the correct result. Note that the neural
-        network's output is assumed to be the index of whichever
-        neuron in the final layer has the highest activation."""
-        test_results = [(np.argmax(self.feedforward(x)), y)
-                        for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
