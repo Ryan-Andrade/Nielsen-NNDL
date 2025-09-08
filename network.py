@@ -73,9 +73,11 @@ def compute_gradients (self, input_layer, target_value):
     zs = []
     
     for b, w in zip( self.biases , self.weights ):
-        # the dot product accepts a matrix of weights and multiplies each row in the matrix
-        #  by the activation vector, then it adds the products (columns) of each row together.
-        # the bias vector is then added to each neuron in the layer.
+        # Each row of the weight matrix lines up its weights (arranged across the columns of the matrix) 
+        # with the same vertical activation column. In essence, every row aligns with the 
+        # activation vector, multiplies each activation by its corresponding weight, and 
+        # then sums those products to produce the input for one neuron. The bias vector 
+        # (one entry per row/neuron) is added afterward.
         z=np. dot (w, activation )+b
         zs. append (z)
         activation = sigmoid (z)
