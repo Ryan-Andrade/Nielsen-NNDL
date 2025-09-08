@@ -77,7 +77,8 @@ def compute_gradients (self, input_layer, target_value):
         # with the same vertical activation column. In essence, every row aligns with the 
         # activation vector, multiplies each activation by its corresponding weight, and 
         # then sums those products to produce the input for one neuron. The bias vector 
-        # (one entry per row/neuron) is added afterward.
+        # (one entry per row/neuron) is added afterward. NumPy carries this out for all rows 
+        # simultaneously, so the entire layer’s inputs are computed in parallel.
         z=np. dot (w, activation )+b
         zs. append (z)
         activation = sigmoid (z)
