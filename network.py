@@ -55,15 +55,16 @@ def sigmoid(z):
 # These gradients indicate how each parameter should be adjusted to reduce the cost 
 # (and thereby improve the network's accuracy when used in training updates).
 def compute_gradients (self, input_layer, target_value):
+    # TODO: Change the spaces to tabs for consistency.
     # Create zero-filled arrays with the same shapes as the network’s biases and weights. 
     # This provides space to hold the gradient values we compute during backpropagation for a single training example.
     # Matching the shapes ensures each gradient lines up one-to-one with its corresponding parameter
     # (biases as column vectors, weights as 2-D matrices).
-    # The input (x) and target (y) values that seed this computation are passed in from the SGD function via update_mini_batch.
     example_b_grads = [np.zeros (b.shape) for b in self.biases]
     example_w_grads = [np.zeros (w.shape) for w in self.weights]
     # This is the beginning of the forward pass. The input layer, is given to the for loop to calculate the activations for
     # the first hidden layer. Hence, why we set activation equal to the input layer.
+    # The input (x) and target (y) values that seed this computation are passed in from the SGD function via update_mini_batch.
     activation = input_layer
     # List to store activations, layer by layer. Here it is clear that
     # input_data is what is received by the first layer, rather than actual activations.
