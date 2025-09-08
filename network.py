@@ -55,11 +55,13 @@ def sigmoid(z):
 # These gradients indicate how each parameter should be adjusted to reduce the cost 
 # (and thereby improve the network's accuracy when used in training updates).
 def compute_gradients (self, input_layer, target_value):
-    # Initialize zero-filled arrays with the same shapes as the network’s biases and weights. 
+    # Create zero-filled arrays with the same shapes as the network’s biases and weights. 
     # This provides space to hold the gradient values we compute during backpropagation for a single training example.
-    # Matching the shapes ensures each gradient lines up one-to-one with its corresponding parameter.
-    example_b_grads = [np.zeros (b.shape ) for b in self.biases]
-    example_w_grads = [np.zeros (w.shape ) for w in self.weights]
+    # Matching the shapes ensures each gradient lines up one-to-one with its corresponding parameter
+    # (biases as column vectors, weights as 2-D matrices).
+    # The input (x) and target (y) values that seed this computation are passed in from the SGD function via update_mini_batch.
+    example_b_grads = [np.zeros (b.shape) for b in self.biases]
+    example_w_grads = [np.zeros (w.shape) for w in self.weights]
     # This is the beginning of the forward pass. The input layer, is given to the for loop to calculate the activations for
     # the first hidden layer. Hence, why we set activation equal to the input layer.
     activation = input_layer
@@ -126,7 +128,7 @@ def evaluate(self, test_data):
 
 # This is the core method to train the neural network using mini-batch stochastic gradient descent. 
 # It accepts the tunable hyperparameters and calls the other functions we defined above. 
-# Training data is a list of tuples (x, y) representing the training inputs (x) 
+# Training data is a list of tuples (x, y) representing the input layer as a vector (x) 
 # and the target values (y). Test data is optional.
 def SGD(self , training_data , epochs , mini_batch_size , learning_rate, test_data=None):
     if test_data:
