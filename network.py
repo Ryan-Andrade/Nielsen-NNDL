@@ -75,7 +75,7 @@ def compute_gradients (self, input_layer, target_value):
     
     # Loop through each layer in the network, pairing the weight matrix and bias vector using zip.
     for b, w in zip( self.biases , self.weights ):
-        # Dot product takes each row (neuron) of the weight matrix (layer connections) lines up its columns (weights) 
+        # Dot product takes each row (neuron) of the weight matrix lines up its columns (weights) 
         # with the one input/activation vector (column) and multiplies each weight by its corresponding 
         # input/activation, and then sums those products to result in a single value for that row (neuron) 
         # turning the weight matrix into a vector (one entry per row/neuron). After that, the bias vector
