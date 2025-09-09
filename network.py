@@ -66,7 +66,7 @@ def cost_derivative (self , output_activations , target_values):
 # Compute the gradients of the cost function with respect to each weight and bias. 
 # These gradients indicate how each parameter should be adjusted to reduce the cost 
 # (and thereby improve the network's accuracy when used in training updates).
-def compute_gradients (self, input_layer, target_value):
+def compute_gradients (self, input_layer, target_values):
     # Create zero-filled arrays with the same shapes as the network’s biases and weights. 
     # These containers will be used to hold the gradient values for a single training example.
     # Matching the shapes ensures each gradient lines up one-to-one with its corresponding parameter
@@ -96,15 +96,15 @@ def compute_gradients (self, input_layer, target_value):
         activation = sigmoid (z)
         activations.append(activation)
     # This is the beginning of the backward pass.
-    error_grad = self.cost_derivative(activations [-1], target_value) * sigmoid_prime (zs [ -1])
-    batch_total_b_grads [ -1] = delta
-    batch_total_w_grads [ -1] = np.dot(delta , activations [ -2]. transpose ())
+    error_grad = self.cost_derivative(activations [-1], target_values) * sigmoid_prime (zs [ -1])
+    example_b_grads [ -1] = error_grad
+    example_w_grads [ -1] = np.dot(error_grad , activations [ -2].transpose ())
     for l in xrange (2, self . num_layers ):
         z = zs[-l]
         sp = sigmoid_prime (z)
-        delta = np.dot( self . weights [-l +1]. transpose () , delta ) * sp
-        batch_total_b_grads [-l] = delta
-        batch_total_w_grads [-l] = np.dot(delta , activations [-l -1]. transpose ())
+        error_grad = np.dot( self . weights [-l +1]. transpose () , error_grad ) * sp
+        batch_total_b_grads [-l] = error_grad
+        batch_total_w_grads [-l] = np.dot(error_grad , activations [-l -1]. transpose ())
     return ( batch_total_b_grads , batch_total_w_grads )
 
 # Model training will employ sequential updates to the weights and biases using mini-batches of training data.
