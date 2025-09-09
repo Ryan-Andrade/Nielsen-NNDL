@@ -59,7 +59,7 @@ def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
 # Provides the starting error signal for backpropagation by comparing
-# the network's output activations to the target values.
+# the network's output activations (vector) to the target values (also a vector).
 def cost_derivative (self , output_activations , target_values):
     return ( output_activations - target_values)
 
