@@ -52,6 +52,12 @@ print(net.biases)
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
+# Define the derivative of the sigmoid function.
+# This is needed to carry the error gradient backward
+# through the non-linearity (sigmoid) during backpropagation. 
+def sigmoid_prime(z):
+    return sigmoid(z)*(1-sigmoid(z))
+
 # Compute the gradients of the cost function with respect to each weight and bias. 
 # These gradients indicate how each parameter should be adjusted to reduce the cost 
 # (and thereby improve the network's accuracy when used in training updates).
