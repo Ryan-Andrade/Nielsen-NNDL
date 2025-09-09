@@ -72,7 +72,6 @@ def compute_gradients (self, input_layer, target_value):
     activations = [input_layer]
     # List to store all the z vectors, layer by layer. Since no calculations have been done yet, it begins empty.
     zs = []
-    
     # Loop through each layer in the network, pairing the weight matrix and bias vector using zip.
     for b, w in zip( self.biases , self.weights ):
         # Dot product takes each row (neuron) of the weight matrix lines up its columns (weights) 
