@@ -67,7 +67,7 @@ def compute_gradients (self, input_layer, target_value):
     # the first hidden layer. Hence, why we set activation equal to the input layer.
     # The input (x) and target (y) values that seed this computation are passed in from the SGD function via update_mini_batch function (both defined later).
     activation = input_layer
-    # Create a list for the for loop to store activations, layer by layer. Here it is clear that
+    # Create a list for the for loop to store activation vectors, layer by layer. Here it is clear that
     # input_data is what is received by the first layer, rather than actual activations, so the list does not begin empty.
     activations = [input_layer]
     # List to store all the z vectors, layer by layer. Since no calculations have been done yet, it begins empty.
