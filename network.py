@@ -73,11 +73,12 @@ def compute_gradients (self, input_layer, target_value):
     # List to store all the z vectors, layer by layer. Since no calculations have been done yet, it begins empty.
     zs = []
     
+    # Loop through each layer in the network, pairing the weight matrix and bias vector using zip.
     for b, w in zip( self.biases , self.weights ):
         # Dot product takes each row (neuron) of the weight matrix (layer connections) lines up its columns (weights) 
         # with the one input/activation vector (column) and multiplies each weight by its corresponding 
-        # input/activation, and then sums those products to result in a single value for that row (neuron). It 
-        # transforms the weight matrix into a vector (one entry per row/neuron). After that, the bias vector
+        # input/activation, and then sums those products to result in a single value for that row (neuron) 
+        # turning the weight matrix into a vector (one entry per row/neuron). After that, the bias vector
         # (column) is added to the result of the dot product, calculating the pre-activation (z) values for the layer (column vector).
         # Numpy's vectorization allows each calculation to be performed on all rows simultaneously in parallel.
         z = np.dot(w, activation)+b
