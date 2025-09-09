@@ -95,8 +95,8 @@ def compute_gradients (self, input_layer, target_value):
         zs.append(z)
         activation = sigmoid (z)
         activations.append(activation)
-    # backward pass
-    delta = self . cost_derivative ( activations [-1], target_value) * sigmoid_prime (zs [ -1])
+    # This is the beginning of the backward pass.
+    error_grad = self.cost_derivative(activations [-1], target_value) * sigmoid_prime (zs [ -1])
     batch_total_b_grads [ -1] = delta
     batch_total_w_grads [ -1] = np.dot(delta , activations [ -2]. transpose ())
     for l in xrange (2, self . num_layers ):
