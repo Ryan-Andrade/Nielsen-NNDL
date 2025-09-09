@@ -58,6 +58,11 @@ def sigmoid(z):
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
+# Provides the starting error signal for backpropagation by comparing
+# the network's output activations to the target values.
+def cost_derivative (self , output_activations , target_values):
+    return ( output_activations - target_values)
+
 # Compute the gradients of the cost function with respect to each weight and bias. 
 # These gradients indicate how each parameter should be adjusted to reduce the cost 
 # (and thereby improve the network's accuracy when used in training updates).
