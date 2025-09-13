@@ -60,6 +60,7 @@ def sigmoid_prime(z):
 
 # Provides the starting error signal for backpropagation by subtracting
 # the network's output activations (vector) by the target values (also a vector).
+# Self is left in the argument list to indicate that this function is a method of the Network class.
 def cost_derivative (self , output_activations , target_values):
     return ( output_activations - target_values)
 
@@ -93,9 +94,16 @@ def compute_gradients (self, input_layer, target_values):
         # Numpy's vectorization allows each calculation to be performed on all rows simultaneously in parallel.
         z = np.dot(w, activation)+b
         zs.append(z)
+        # The sigmoid function is then applied to each entry in the z vector to produce the activation vector for the layer.
         activation = sigmoid (z)
         activations.append(activation)
-    # This is the beginning of the backward pass.
+    ## This is the beginning of the backward pass.
+    # Compute the error at the output layer([-1]). This is the initial gradient of the cost function.
+    # It is the product of two terms:
+    #   1. The derivative of the cost function (cost_derivative) which is simply the activation - target value. This tells us what direction (+/-) and how much to
+    #      adjust the output activations to reduce the cost.
+    #   2. The derivative of the sigmoid function (sigmoid_prime) which measures how the output activations change as the pre-activation values (z) change.
+    # The element-wise product of these two terms gives the gradient
     error_grad = self.cost_derivative(activations [-1], target_values) * sigmoid_prime (zs [ -1])
     example_b_grads [ -1] = error_grad
     example_w_grads [ -1] = np.dot(error_grad , activations [ -2].transpose ())
@@ -103,9 +111,9 @@ def compute_gradients (self, input_layer, target_values):
         z = zs[-l]
         sp = sigmoid_prime (z)
         error_grad = np.dot( self . weights [-l +1]. transpose () , error_grad ) * sp
-        batch_total_b_grads [-l] = error_grad
-        batch_total_w_grads [-l] = np.dot(error_grad , activations [-l -1]. transpose ())
-    return ( batch_total_b_grads , batch_total_w_grads )
+        example_b_grads [-l] = error_grad
+        example_w_grads [-l] = np.dot(error_grad , activations [-l -1]. transpose ())
+    return ( example_b_grads , example_w_grads )
 
 # Model training will employ sequential updates to the weights and biases using mini-batches of training data.
 # This function will update the network's weights and biases.
