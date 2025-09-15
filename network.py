@@ -103,16 +103,31 @@ def compute_gradients (self, input_layer, target_values):
     #   1. The derivative of the cost function (cost_derivative) which is simply the activation - target value. This tells us what direction (+/-) and how much to
     #      adjust the output activations to reduce the cost.
     #   2. The derivative of the sigmoid function (sigmoid_prime) which measures how the output activations change as the pre-activation values (z) change.
-    # The element-wise product of these two terms gives the gradient
-    error_grad = self.cost_derivative(activations [-1], target_values) * sigmoid_prime (zs [ -1])
-    example_b_grads [ -1] = error_grad
-    example_w_grads [ -1] = np.dot(error_grad , activations [ -2].transpose ())
-    for l in xrange (2, self . num_layers ):
+    # The product of these two terms gives the gradient as a scalar for a single neuron output layer, or a vector for a multi-neuron output layer.
+    layer_error = self.cost_derivative(activations [-1], target_values) * sigmoid_prime (zs [ -1])
+    # Because the bias is simply added to the weighted inputs, it can be adjusted directly by the error value.
+    example_b_grads[-1] = layer_error
+    # Refer to the last hidden layer's activations (activations[-2]) and you'll see that the data structure is a column vector with one activation per neuron.
+    # Since output_error is also a column vector with one error per neuron, if we transpose activations[-2] to a row vector, the dot product multiplies each
+    # error (row) by each activation (column) creating a cross dimension between errors and activations, resulting in a weight-gradient matrix that matches the 
+    # shape of the weight matrix between the last hidden layer and the output layer which we collapsed using the dot product in the forward pass.
+    # Numpy's vectorization allows each calculation to be performed on all rows and columns simultaneously in parallel.
+    example_w_grads[-1] = np.dot(layer_error , activations[-2].transpose ())
+    # xrange accepts two arguments (start, stop) and iterates from start to stop-1.
+    for l in xrange (2, self.num_layers):
+        # Set the z vector to the pre-activation values of the second-to-last layer [-l=(2)] on the first iteration, then the third-to-last on the next, and so on.
         z = zs[-l]
-        sp = sigmoid_prime (z)
-        error_grad = np.dot( self . weights [-l +1]. transpose () , error_grad ) * sp
-        example_b_grads [-l] = error_grad
-        example_w_grads [-l] = np.dot(error_grad , activations [-l -1]. transpose ())
+        # apply the derivative of the sigmoid function to the z vector.
+        sp = sigmoid_prime(z)
+        # Transpose the weight matrix of each layer so that the rows (neurons) become columns, and the columns (weights) becomes rows.
+        # This allows the dot product to combine the error values from the layer/output ahead (which are in a column vector) with the weights that connect to the current layer.
+        # The result is a column vector with one error value per neuron in the current layer.
+        # This error value is then multiplied by the derivative of the sigmoid function (sp) to
+        # give the gradient of the cost function with respect to the pre-activation (z) values of the current layer.
+        # This gives the error signal for the current layer, which is then used to compute the gradients for the biases and weights of the current layer.
+        layer_error = np.dot(self.weights[-l +1].transpose(), layer_error) * sp
+        example_b_grads [-l] = layer_error
+        example_w_grads [-l] = np.dot(layer_error , activations [-l -1]. transpose ())
     return ( example_b_grads , example_w_grads )
 
 # Model training will employ sequential updates to the weights and biases using mini-batches of training data.
