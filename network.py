@@ -4,9 +4,11 @@ network.py
 
 A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
-using backpropagation.  Note that I have focused on making the code
-simple, easily readable, and easily modifiable.  It is not optimized,
-and omits many desirable features.
+using backpropagation.  Note that I have focused on keeping the code simple and curating
+detailed comments so one with a bit of background knowledge can understand the
+operations taking place.  It is not optimized,and omits many desirable features. 
+Keep in mind that Numpy's vectorization allows many of the calculations to be 
+performed very efficiently in parallel.
 """
 
 # import dependencies
@@ -75,17 +77,18 @@ def compute_gradients (self, input_layer, target_values):
     # the gradients can be assigned to the correct positions.
     example_b_grads = [np.zeros (b.shape) for b in self.biases]
     example_w_grads = [np.zeros (w.shape) for w in self.weights]
-    # This is the beginning of the forward pass. The input layer, is given to the for loop to calculate the activations for
+    ## This is the beginning of the forward pass. 
+    # The input layer, is given to the for loop to calculate the activations for
     # the first hidden layer. Hence, why we set activation equal to the input layer.
-    # The input (x) and target (y) values that seed this computation are passed in from the SGD function via update_mini_batch function (both defined later).
+    # The input (x) and target (y) values that seed this computation are passed in from the SGD function via the update_mini_batch function (both defined later).
     activation = input_layer
-    # Create a list for the for loop to store activation vectors, layer by layer. Here it is clear that
-    # input_data is what is received by the first layer, rather than actual activations, so the list does not begin empty.
+    # Create a list for the for loop to store activation vectors, layer by layer. Here it is clear that the
+    # input data vector is what's received by the first layer, rather than actual activations, so the list does not begin empty.
     activations = [input_layer]
     # List to store all the z vectors, layer by layer. Since no calculations have been done yet, it begins empty.
     zs = []
     # Loop through each layer in the network, pairing the weight matrix and bias vector using zip.
-    for b, w in zip( self.biases , self.weights ):
+    for b, w in zip(self.biases , self.weights):
         # Dot product takes each row (neuron) of the weight matrix, lines up its columns (weights) 
         # with the one input/activation vector (column) and multiplies each weight by its corresponding 
         # input/activation, and then sums those products to result in a single value for that row (neuron) 
@@ -93,25 +96,26 @@ def compute_gradients (self, input_layer, target_values):
         # (column) is added to the result of the dot product, calculating the pre-activation (z) values for the layer (column vector).
         # Numpy's vectorization allows each calculation to be performed on all rows simultaneously in parallel.
         z = np.dot(w, activation)+b
+        # Add the current layer's z vector to the list of z vectors.
         zs.append(z)
         # The sigmoid function is then applied to each entry in the z vector to produce the activation vector for the layer.
         activation = sigmoid (z)
+        # Add the current layer's activation vector to the list of activation vectors for the network.
         activations.append(activation)
     ## This is the beginning of the backward pass.
-    # Compute the error at the output layer([-1]). This is the initial gradient of the cost function.
-    # It is the product of two terms:
-    #   1. The derivative of the cost function (cost_derivative) which is simply the activation - target value. This tells us what direction (+/-) and how much to
+    # Find the error at the output layer (activations[-1]) by computing the product of two terms:
+    #   1. The derivative of the cost function (cost_derivative) which is simply the activation - the target value. This tells us what direction (+/-) and how much to
     #      adjust the output activations to reduce the cost.
     #   2. The derivative of the sigmoid function (sigmoid_prime) which measures how the output activations change as the pre-activation values (z) change.
     # The product of these two terms gives the gradient as a scalar for a single neuron output layer, or a vector for a multi-neuron output layer.
     layer_error = self.cost_derivative(activations [-1], target_values) * sigmoid_prime (zs [ -1])
-    # Because the bias is simply added to the weighted inputs, it can be adjusted directly by the error value.
+    # Because the bias is simply added to the weighted inputs to find the pre-activation value, it can be adjusted directly by the error value therefore we can
+    # assign the layer_error vector directly to the end of the example's biases gradients list.
     example_b_grads[-1] = layer_error
-    # Refer to the last hidden layer's activations (activations[-2]) and you'll see that the data structure is a column vector with one activation per neuron.
-    # Since output_error is also a column vector with one error per neuron, if we transpose activations[-2] to a row vector, the dot product multiplies each
-    # error (row) by each activation (column) creating a cross dimension between errors and activations, resulting in a weight-gradient matrix that matches the 
-    # shape of the weight matrix between the last hidden layer and the output layer which we collapsed using the dot product in the forward pass.
-    # Numpy's vectorization allows each calculation to be performed on all rows and columns simultaneously in parallel.
+    # On the other hand, since each weight is multiplied by its corresponding activation from the previous layer during the forward pass, on the backward pass the weight 
+    # gradients are found by multiplying the error(s) by the activation(s) of the previous layer. That is why activations[-2] is used, because starting from the end of the network 
+    # (output layer) we need the activations from the one before it (the last hidden layer). However, if we look at our shapes: layer_error is a column vector and so is activations[-2].
+    # So we need to transpose activations[-2] to a row vector so that the dot product can multiply each error (row) by each activation (column) which creates a weight-gradient matrix.
     example_w_grads[-1] = np.dot(layer_error , activations[-2].transpose ())
     # xrange accepts two arguments (start, stop) and iterates from start to stop-1.
     for l in xrange (2, self.num_layers):
@@ -119,15 +123,22 @@ def compute_gradients (self, input_layer, target_values):
         z = zs[-l]
         # apply the derivative of the sigmoid function to the z vector.
         sp = sigmoid_prime(z)
-        # Transpose the weight matrix of each layer so that the rows (neurons) become columns, and the columns (weights) becomes rows.
-        # This allows the dot product to combine the error values from the layer/output ahead (which are in a column vector) with the weights that connect to the current layer.
-        # The result is a column vector with one error value per neuron in the current layer.
-        # This error value is then multiplied by the derivative of the sigmoid function (sp) to
-        # give the gradient of the cost function with respect to the pre-activation (z) values of the current layer.
-        # This gives the error signal for the current layer, which is then used to compute the gradients for the biases and weights of the current layer.
+        # Given that we are moving backward through the network and we need to align the weights with the errors from the layer/output ahead,
+        # transpose the weight matrix of each layer so that the rows (neurons) become columns, and the columns (weights) becomes rows. 
+        # Now that every row is a weight and every column is a neuron when the dot product multiplies the transposed weight matrix by the layer_error vector,
+        # it aligns each weight (row) with its corresponding error (column). This allows the dot product to sum the products of each weight*error for each neuron (row)
+        # to produce a single error value for each neuron in the current layer (column). This error value is then multiplied by the derivative of the sigmoid function (sp) to
+        # give the gradient of the cost function with respect to the pre-activation (z) values of the current layer. 
+        # This gives us the layer_error for the current layer, which is then used to compute the gradients for the weights and biases of this layer.
+        # This process is repeated for each layer moving backward through the network.
         layer_error = np.dot(self.weights[-l +1].transpose(), layer_error) * sp
+        # Assign the layer_error to the appropriate position in the example_b_grads list.
+        # -l indexes from the end of the list, so -2 is the second-to-last layer, -3 is the third-to-last, and so on.
         example_b_grads [-l] = layer_error
-        example_w_grads [-l] = np.dot(layer_error , activations [-l -1]. transpose ())
+        # Transpose the activation vector from a column to a row so that the layer_error (column) can be multiplied by the activations (row)
+        # to produce a weight-gradient matrix that matches the shape of the weight matrix between the current layer and the previous layer.
+        # This is done for each layer moving backward through the network.
+        example_w_grads [-l] = np.dot(layer_error , activations[-l -1].transpose())
     return ( example_b_grads , example_w_grads )
 
 # Model training will employ sequential updates to the weights and biases using mini-batches of training data.
