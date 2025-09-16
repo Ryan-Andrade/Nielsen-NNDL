@@ -6,7 +6,7 @@ A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  Note that I have focused on keeping the code simple and curating
 detailed comments so one with a bit of background knowledge can understand the
-operations taking place.  It is not optimized,and omits many desirable features. 
+operations taking place.  It is not optimized and omits many desirable features. 
 Keep in mind that Numpy's vectorization allows many of the calculations to be 
 performed very efficiently in parallel.
 """
@@ -26,7 +26,7 @@ class Network(object):
         self.num_layers = len(sizes)
         # create an attribute to capture the sizes list.
         self.sizes = sizes
-        # the bias attribute uses numpy to create random values in a standard distribution with 0 mean and 1 standard deviation.
+        # the biases attribute uses numpy and random to create random values in a standard distribution with 0 mean and 1 standard deviation.
         # the y variable represents the number of neurons in the layer.
         # the 1 represents that each neuron has a single bias value.
         # this is done for each layer except the input layer (hence sizes[1:])
@@ -54,9 +54,13 @@ print(net.biases)
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
-# Define the derivative of the sigmoid function.
-# This is needed to carry the error gradient backward
-# through the non-linearity (sigmoid) during backpropagation. 
+# Define the derivative of the sigmoid function. This is needed to carry the error gradient backward through
+# the non-linearity (sigmoid) during backpropagation.
+# The derivative of the sigmoid function is a bell shaped curve that peaks at 0.25 when z=0 & a=0.5, and approaches 0 as z approaches
+# positive or negative infinity. This means that when the neuron is very strongly activated (a = .99 and z is a large positive number) or
+# very strongly deactivated (a = .01 and z is a large negative number), the gradient will be very small, which can slow down learning.
+# Conversely, when the neuron is in the middle of its activation range (a =0.5 and z is near 0), the gradient is larger, allowing for more 
+# significant weight updates during training. 
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
