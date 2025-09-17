@@ -11,16 +11,29 @@ Keep in mind that Numpy's vectorization allows many of the calculations to be
 performed very efficiently in parallel.
 """
 
-# import dependencies
+## import the python libraries that we need.
+# Numpy is a powerful library for numerical computing in Python, particularly for operations involving arrays (lists) and matrices (spreadsheets).
+# It provides support for large, multi-dimensional arrays and matrices, along with a collection of mathematical functions to operate on these data structures efficiently.
 import numpy as np
+# The random library provides functions for generating random numbers and performing random operations.
 import random
 
-# Create a python class called Network
+# In Python, "class" defines a new blueprint for creating "objects" (individual networks in our case but it could be anything).
+# Classes bundle together data (attributes like weights and biases) and behavior (methods).
+# A method is simply a function defined inside a class that operates on a specific object of that class. Normal functions 
+# are defined outside of classes and operate independently which we will do later.
+# object ensures consistent behavior across all classes. It was required for Python 2 but optional in 3.
+# Network is the name of our class. It could be named anything but Network is descriptive.
 class Network(object):
-    ## Define an initialization method to assign the attributes of the network (i.e. biases, weights,...)
-    # 'self' refers to the Network
-    # 'sizes' is a list argument. Each entry is the amount of neurons, and the # of entries=the # of layers. 
-    # For example, [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
+    # In Python 'def' is used to define a function but since we are inside a class, this is a method.
+    # The __init__ method is a special method that Python calls when you create a new instance of the class.
+    # It initializes the object's attributes (in our case biases, weights,...) and is called automatically when you create a new object (network).
+    # 'self' is an arbitrary name that refers to the specific instance of the class being created or used and is the first parameter of 
+    # any method in the class. It could be named anything, but 'self' is the widely accepted convention. We don't pass a value for self 
+    # when we call the method; Python does that automatically. However we include it in __init_ is because without it, Python wouldn't know 
+    # which instance of the class to initialize. 'sizes' is an ordinary parameter name that the author chose to build the Neural Network.
+    # Each entry is the amount of neurons, and the # of entries=the # of layers. For example, [2,3,1] = 3 layers. 
+    # The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
     def __init__(self , sizes):
         # create an attribute of the network to express the number of layers in the network.
         self.num_layers = len(sizes)
