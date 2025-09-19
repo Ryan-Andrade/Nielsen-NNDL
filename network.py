@@ -7,7 +7,7 @@ algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  Note that I have focused on keeping the code simple and curating
 detailed comments so one with a bit of background knowledge can understand the
 operations taking place.  It is not optimized and omits many desirable features. 
-Keep in mind that Numpy's vectorization allows many of the calculations to be 
+Keep in mind that NumPy's vectorization allows many of the calculations to be 
 performed very efficiently in parallel.
 """
 
@@ -18,43 +18,34 @@ import numpy as np
 # The random library provides functions for generating random numbers and performing random operations.
 import random
 
-# In Python, "class" defines a new blueprint for creating "objects" (individual networks in our case but it could be anything).
-# Classes bundle together data (attributes like weights and biases) and behavior (methods).
-# A method is simply a function defined inside a class that operates on a specific object of that class. Normal functions 
-# are defined outside of classes and operate independently which we will do later.
-# object ensures consistent behavior across all classes. It was required for Python 2 but optional in 3.
-# Network is the name of our class. It could be named anything but Network is descriptive.
+# In Python, "class" defines a new blueprint for creating "objects" (neural networks in our case, but it could be anything).
+# Objects hold data via attributes, such as weights and biases. They also hold functions which are called methods
+# when they are defined inside of a class. 'object' is required to be passed as a parameter for Python 2 but is optional in 3.
+# Network is the name of our class but it could be named anything.
 class Network(object):
-    # In Python 'def' is used to define a function but since we are inside a class, this is a method.
-    # The __init__ method is a special method that Python calls when you create a new instance of the class.
-    # It initializes the object's attributes (in our case biases, weights,...) and is called automatically when you create a new object (network).
-    # 'self' is an arbitrary name that refers to the specific instance of the class being created or used and is the first parameter of 
-    # any method in the class. It could be named anything, but 'self' is the widely accepted convention. We don't pass a value for self 
-    # when we call the method; Python does that automatically. However we include it in __init_ is because without it, Python wouldn't know 
-    # which instance of the class to initialize. 'sizes' is an ordinary parameter name that the author chose to build the Neural Network.
-    # Each entry is the amount of neurons, and the # of entries=the # of layers. For example, [2,3,1] = 3 layers. 
-    # The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
+    # The __init__ method is automatically called whenever you create a new object of the class to initialize the object's attributes.
+    # 'self' is an arbitrary name that refers to the specific object of the class and is the first parameter of 
+    # any method in the class. It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an ordinary parameter name 
+    # that the author chose to build the Neural Network.  
     def __init__(self , sizes):
-        # create an attribute of the network to express the number of layers in the network.
+        # Each entry in sizes represents the amount of neurons per layer, thus the # of entries=the # of layers.
         self.num_layers = len(sizes)
-        # create an attribute to capture the sizes list.
+        # Store the sizes list as an attribute of the network object.
         self.sizes = sizes
-        # the biases attribute uses numpy and random to create random values in a standard distribution with 0 mean and 1 standard deviation.
-        # the y variable represents the number of neurons in the layer.
-        # the 1 represents that each neuron has a single bias value.
-        # this is done for each layer except the input layer (hence sizes[1:])
-        # the result is a list of bias vectors
+        # To create the biases attribute iterate over the sizes list and for each entry the y variable represents the number of neurons passed in by the sizes list 
+        # while the 1 represents that there is a single bias value for each neuron. During each pass NumPy's randn function creates a column vector of shape (y,1) 
+        # filled with random values drawn from a standard normal distribution (randn) resulting in a list of bias vectors. The input layer is skipped using sizes[1:].
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         # create a weight matrix for each connection between layers (input → hidden, hidden → output, etc.):
         #   - x = number of neurons in the previous layer
         #   - y = number of neurons in the current layer
-        # Each entry is drawn from a standard normal distribution (randn).
+        # Each entry is drawn from a standard normal distribution.
         # Using zip(sizes[:-1], sizes[1:]) pairs each (prev_layer_size, next_layer_size), so the input layer
         # itself is skipped — weights are only defined between layers.
         # The result is a list of weight matrices.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
-# Create a network
+# [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
 # Test to see its weights & biases
