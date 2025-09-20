@@ -36,18 +36,20 @@ class Network(object):
         # while the 1 represents that there is a single bias value for each neuron. During each pass NumPy's randn function creates a column vector of shape (y,1) 
         # filled with random values drawn from a standard normal distribution (randn) resulting in a list of bias vectors. The input layer is skipped using sizes[1:].
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        # create a weight matrix for each connection between layers (input → hidden, hidden → output, etc.):
-        #   - x = number of neurons in the previous layer
-        #   - y = number of neurons in the current layer
-        # Each entry is drawn from a standard normal distribution.
-        # Using zip(sizes[:-1], sizes[1:]) pairs each (prev_layer_size, next_layer_size), so the input layer
-        # itself is skipped — weights are only defined between layers.
-        # The result is a list of weight matrices.
+        # To create the weights attribute we need to model the connections between two layers so we use an iterator called zip in our for loop to form pairs based on 
+        # the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning off the sizes list respectively. 
+        # This way the index postions of each list offsets the other by one layer. The x and y variables represent the values held in each list. The order of 
+        # the variables map to the order of the lists in zip, so x represents the values in the list with the end sliced off and vice versa for y. Given that the values
+        # in the lists represent the number of neurons per layer, and since the number of weights per neuron in the current layer is determined by the number of neurons
+        # in the previous layer we need to reverse the order of the variables when passing them to NumPy's randn function. From there NumPy creates a y, x matrix
+        # of random values where the # of rows = the number of current layer neurons and the # of columns = the number of previous layer neurons. The for loop
+        # then continues until zip has provided the values needed to create a weight matrix for every layer in the network. The result is a list of weight matrices.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
+print(list(zip(net.sizes[:-1], net.sizes[1:]))) # Output: 1
 # Test to see its weights & biases
 print(net.weights)
 print(net.biases)
@@ -211,10 +213,10 @@ def SGD(self , training_data , epochs , mini_batch_size , learning_rate, test_da
     if test_data:
         # Including test data calls the evaluate function to create a running tally of model performance per epoch.
         # This drastically slows down training, so only include it if you need to see progress. 
-        print "Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test)
+        print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
     else:
         # During training, print the epoch.
-        print "Epoch {0} complete".format(j)
+        print ("Epoch {0} complete".format(j))
 
 # create a function that sends an input vector 'a' through the network and returns the output vector.
 def feedforward(self , a):
