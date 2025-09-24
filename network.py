@@ -7,8 +7,7 @@ algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  Note that I have focused on keeping the code simple and curating
 detailed comments so one with a bit of background knowledge can understand the
 operations taking place.  It is not optimized and omits many desirable features. 
-Keep in mind that NumPy's vectorization allows many of the calculations to be 
-performed very efficiently.
+
 """
 
 ## import the python libraries that we need.
@@ -23,29 +22,34 @@ import random
 # when they are defined inside of a class. 'object' is required to be passed as a parameter for Python 2 but is optional in 3.
 # Network is the name of our class but it could be named anything.
 class Network(object):
-    # The __init__ method is automatically called whenever you create a new object of the class to initialize the object's attributes.
+    # The __init__ method is automatically called to initialize the object's attributes whenever you create a new object of the class.
     # 'self' is an arbitrary name that refers to the specific object of the class and is the first parameter of 
     # any method in the class. It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an ordinary parameter name 
-    # that the author chose to build the Neural Network.  
+    # that the author chose and accepts a list argument to build the Neural Network.  
     def __init__(self , sizes):
         # Each entry in sizes represents the amount of neurons per layer, thus the # of entries=the # of layers.
         self.num_layers = len(sizes)
         # Store the sizes list as an attribute of the network object.
         self.sizes = sizes
-        # To create the biases attribute iterate over the sizes list and for each entry the y variable becomes the value representing the number of neurons in that layer of 
-        # the network, while the 1 sets the dimension of the data container given that there is only a single bias value for each neuron. During each pass NumPy's randn 
-        # function creates a data container of shape (y,1) filled with random values drawn from a standard normal distribution resulting in a list of bias containers. 
-        # The input layer is skipped using sizes[1:]. These bias containers are most often vectors, but can also be scalars.
+        # To create the biases attribute we need to skip the first the number in the sizes list since that is the input layer and iterate through 
+        # the rest of them. For each iteration we need to generate that number of random values as biases, hold those biases in a container, then 
+        # store that container as an entry into our attribute list. After that, we move onto the next iteration and repeat this process until the 
+        # list is complete. We skip the input layer with sizes[1:]. We iterate with a for loop where the y variable assumes the number of neurons 
+        # for the layer and the 1 sets the dimension of the container to only a single bias for each neuron. NumPy then receives these dimensions 
+        # as blueprints and uses its randn library to build the container with random biases drawn from a standard normal distribution. This operation
+        # occurs within list brackets to store these bias containers. Most often these containers are vectors, but they can also be scalars.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        # The data container used to store the weights attribute can also be either a scalar or vector, but is most commonly a matrix.
-        # To create the weights attribute we need to model the connections between two layers so we use an iterator called zip in our for loop to form pairs based on 
-        # the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning off the sizes list respectively. 
-        # This way the index postions of each list offsets the other by one layer. The x and y variables assume the values of the indexed pair during every pass of the for loop.
-        # The order of the variables map to the order of the lists in zip, so x becomes the values in the list with the end sliced off and vice versa for y. Given that the 
-        # values in the lists represent the number of neurons per layer, and since the number of weights per neuron in the current layer is determined by the number of neurons
-        # in the previous layer we need to reverse the order of the variables when passing them to NumPy's randn function. Doing so ensures that in a resulting container
-        # the # of rows y = the number of current layer neurons and the # of columns x = the number of previous layer neurons. The for loop then continues until zip has 
-        # provided the values needed to create a weight container for every layer in the network. The result is a list of weight containers holding random values.
+        # The container used to store a layer of weights can also be either a scalar or vector, but is most commonly a matrix. To create the weights 
+        # attribute we need to model the connections between every pair of layers in the network, so we use an iterator called zip in our for loop to 
+        # form pairs based on the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning
+        # off the sizes list respectively. This offsets the index positions of each list by one layer. The x and y variables assume the values of the 
+        # indexed pair during every pass of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in 
+        # the list with the end sliced off and vice versa for y. Given that the values in the lists represent the number of neurons per layer, and since
+        # the number of weights per neuron in the current layer is determined by the number of neurons in the previous layer we need to reverse the order
+        # of the variables when passing them to NumPy's randn function. Doing so ensures that in a resulting container the # of rows, y, = the number of 
+        # current layer neurons and the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has provided the 
+        # values needed to create a weight container for every layer in the network. This operation occurs within list brackets storing the weight 
+        # containters to form the weights attribute list.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
