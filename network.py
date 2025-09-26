@@ -11,8 +11,8 @@ operations taking place.  It is not optimized and omits many desirable features.
 """
 
 ## import the python libraries that we need.
-# Numpy is a powerful library for numerical computing in Python, particularly for operations involving arrays (lists) and matrices (spreadsheets).
-# It provides support for large, multi-dimensional arrays and matrices, along with a collection of mathematical functions to operate on these data structures efficiently.
+# Numpy is a powerful library for numerical computing in Python, particularly for operations involving arrays (lists) and matrices (spreadsheets). It provides 
+# support for large, multi-dimensional arrays and matrices, along with a collection of mathematical functions to operate on these data structures efficiently.
 import numpy as np
 # The random library provides functions for generating random numbers and performing random operations.
 import random
@@ -41,8 +41,8 @@ class Network(object):
         # these containers are vectors, but they can also be scalars.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         # The container used to store a layer of weights can also be either a scalar or vector, but is most commonly a matrix. To create the weights 
-        # attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for loop to 
-        # form pairs based on the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning
+        # attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for loop 
+        # to form pairs based on the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning
         # off the sizes list respectively. This offsets the index positions of each list by one layer. The x and y variables assume the values of the 
         # indexed pair during every pass of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in 
         # the list with the end sliced off and vice versa for y. Given that the values in the lists represent the number of neurons per layer, and since
@@ -56,20 +56,23 @@ class Network(object):
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
-# Define a sigmoid function that introduces non-linearity to the network by using the natural exponent with '.exp'.
-# z is the pre-activation value, the linear combination of: inputs, weights, activations, and bias. 
-# For a layer with a single neuron z is a scalar; for a layer of multiple neurons it's a vector.
-# The formula itself transforms any value in the z container to a number, a, between 0 and 1. 
+# Define an activation function to introduce non-linearity to the output of our neurons so that our Network can differentiate between them to identify patterns
+# in the data and learn from them. Here we use the sigmoid formula which contains the mathematical constant e '.exp' a number that has desirable properties such 
+# as a smooth curve and a simple derivative to help our network learn. z is the pre-activation value, the linear combination of: inputs, weights, activations, and 
+# bias. For a layer with a single neuron z is a scalar; for a layer of multiple neurons it's a vector. e has an exponent of -z, which means that as z becomes more 
+# positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. 
+# Adding 1 to the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a
+# probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely resulting in a smooth S-shaped 
+# curve with the x axis as z and the y axis as the output of the sigmoid function.
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
-# Define the derivative of the sigmoid function. This is needed to carry the error gradient backward through
-# the non-linearity (sigmoid) during backpropagation.
-# The derivative of the sigmoid function is a bell shaped curve that peaks at 0.25 when z=0 & a=0.5. It approaches 0 as z approaches
-# positive or negative infinity. This means that when the neuron is very strongly activated (a = .99 and z is a large positive number) or
-# very strongly deactivated (a = .01 and z is a large negative number), the gradient will be very small, which can slow down learning.
-# Conversely, when the neuron is in the middle of its activation range (a =0.5 and z is near 0), the gradient is larger, allowing for more 
-# significant weight updates during training. 
+# Define a function to calculate the derivative of the sigmoid to help the network learn from its mistakes. The calculation is as simple as multiplying the sigmoid 
+# function by 1 minus itself because of e's unique mathematical properties. The result is a measure of how sensitive the output of the sigmoid function is to changes
+# in its input (z). When the network outputs a mistake, the derivative of the sigmoid is used by the neurons to adjust their weights and biases in a series of calculations
+# backwards through the network. That process is called backpropagation. If we were to graph the derivative of the sigmoid function, we would see a bell-shaped curve. That 
+# curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens towards 0 as z approaches positive or negative infinity. This means that the neuron learns the 
+# most when its output is uncertain and learns the least when its output is very certain.
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
