@@ -69,28 +69,26 @@ def sigmoid(z):
 
 # Define a function to calculate the derivative of the sigmoid to help the network learn from its mistakes. The calculation is as simple as multiplying the sigmoid 
 # function by 1 minus itself because of e's unique mathematical properties. The result is a measure of how sensitive the output of the sigmoid function is to changes
-# in its input (z). When the network outputs a mistake, the derivative of the sigmoid is used by the neurons to adjust their weights and biases in a series of calculations
-# backwards through the network. That process is called backpropagation. If we were to graph the derivative of the sigmoid function, we would see a bell-shaped curve. That 
-# curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens towards 0 as z approaches positive or negative infinity. This means that the neuron learns the 
-# most when its output is uncertain and learns the least when its output is very certain.
+# in its input (z). When the network outputs a mistake, the amount of error is measured and sent backwards through the network via a series of calculations in a process
+# called backpropagation. The calculations act as instructions for the neurons on how to adjust their parameters closer to a value that has less error. The derivative 
+# of the sigmoid calculation helps the neurons carry those instructions through the sigmoid transformation. If we were to graph the derivative of the sigmoid function,
+# we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. This 
+# means that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-# The cost function derivative provides the starting error signal for backpropagation by subtracting
-# the network's output activation(s) by the target value(s).
-# Self is left in the argument list to indicate that this function is a method of the Network class.
+# The cost function derivative provides the starting error signal for backpropagation by subtracting the network's output activation(s) by the target value(s).
 def cost_derivative (self , output_activations , target_values):
     return (output_activations - target_values)
 
-# Compute the gradients of the cost function with respect to each weight and bias. 
-# These gradients indicate how each parameter should be adjusted to reduce the cost 
-# (and thereby improve the network's accuracy when used in training updates).
+# Define a function to compute the gradients of the cost function with respect to each weight and bias. These slopes indicate how each parameter should be adjusted to 
+# reduce the cost and thereby improve the network's accuracy when used in training updates.
 def compute_gradients (self, input_layer, target_values):
-    # Create zero-filled containers with the same shapes as the network’s biases and weights. 
-    # These containers will be used to hold the gradient values for one network training example.
-    # Matching the shapes ensures each gradient lines up one-to-one with its corresponding parameter
-    # (biases as column vectors, weights as 2-D matrices) so that as the function computes layer by layer, 
-    # the gradients can be assigned to the correct positions.
+    # Create zero-filled containers with the same shapes as the network’s biases and weights attributes. These containers will be used to hold the gradient values for 
+    # one network training example. Matching the shapes ensures each calculated gradient lines up one-to-one with its corresponding parameter so that as the function 
+    # computes layer by layer, the gradients can be stored in containers to the correct positions. 
+
+    # I want to edit this comment so that it takes the container operations perspective rather than the gradient level perspective
     example_b_grads = [np.zeros(b.shape) for b in self.biases]
     example_w_grads = [np.zeros(w.shape) for w in self.weights]
     ## This is the beginning of the forward pass. 
