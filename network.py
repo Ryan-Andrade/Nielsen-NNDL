@@ -82,40 +82,34 @@ def cost_derivative (self , output_activations , target_values):
     return (output_activations - target_values)
 
 # Define a function to compute the gradients of the cost function with respect to each weight and bias. These slopes indicate how each parameter should be adjusted to 
-# reduce the cost and thereby improve the network's accuracy when used in training updates.
+# reduce their individual error and thereby improve the network's accuracy in total.
 def compute_gradients (self, input_layer, target_values):
-    # Create zero-filled containers with the same shapes as the network’s biases and weights attributes. These containers will be used to hold the gradient values for 
-    # one network training example. Matching the shapes ensures each calculated gradient lines up one-to-one with its corresponding parameter so that as the function 
-    # computes layer by layer, the gradients can be stored in containers to the correct positions. 
-
-    # I want to edit this comment so that it takes the container operations perspective rather than the gradient level perspective
+    # Create lists of containers with zeros in the same shapes as the network’s biases and weights attributes. The goal of this entire function is to fill these 
+    # containers with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies of 
+    # the lists of containers storing the network's parameters we can iteratively manipulate the attributes of the actual network but store the resulting 
+    # calculations in the lists of empty containers thereby creating a one to one alignment between the network's parameters and their corresponding gradients.
     example_b_grads = [np.zeros(b.shape) for b in self.biases]
     example_w_grads = [np.zeros(w.shape) for w in self.weights]
     ## This is the beginning of the forward pass. 
-    # We choose the naming convention layer_activations because that is what is what we will be computing as we iterate through the network.
-    # We set it equal to the input layer because the input layer itself does not have parameters (weights and biases) to compute an activation.
-    # Activations are first computed starting from the hidden layer, so this just passes the raw input values forward as the starting point.
-    # The input (x) and target (y) values that seed this computation are passed in from a chain of functions defined later.
+    # We chose the name layer_activations because that is what we will be computing as we iterate through the lists of Network's attributes. We set it equal to the 
+    # input layer because those encoded data are what we want the network to compute into output activations and the process begins by feeding them forward to the 
+    # first hidden layer.
     layer_activations = input_layer
-    # Create a list for the loop to store each activation layer. Here it is clear that the input data
-    # is what's received by the first layer, rather than actual activations, so the list does not begin empty.
+    # Create a list for the loop to store each activation layer.
     network_activations = [input_layer]
-    # List to store all the z containers, layer by layer. Since no calculations have been done yet, it begins empty.
+    # This list will store all the z containers.
     zs = []
-    # Zip takes the index position from the biases & weights attributes and iteratively forms pairs of a bias container and a weight container.
-    # b and w assume the respective values held in each container of the new pair. Each pass of the for loop performs operations 
-    # on the values held in these containers which together represent a layer of the network. 
+    # This is the primary for loop that iterates through the network's attributes to compute the activations for each layer. Zip takes the index positions from the lists
+    # of biases & weights attributes and iteratively combines them to form pairs of a bias container and a weight container whose values can be transformed together in 
+    # one operation. b and w assume the values of their respective container in the new pair.
     for b, w in zip(self.biases , self.weights):
-        # Dot product takes each weight container and multiplies it with a layer-activation container, then sums the products
-        # across columns for each row. The bias container is then added to that result to find the pre-activation z value(s)
-        # for the layer. Looking inside the common containers (matrices and vectors): each row of a weight matrix corresponds
-        # to one neuron in the layer, and each column position in that row corresponds to one input weight for that neuron.
-        # These rows map directly to the layer’s biases and to the layer’s activations (both typically held as vectors).
-        # During the multiplication step, NumPy reuses the same activation vector for every row of the weight matrix, aligning
-        # each row’s columns with the vector’s entries so the per-row dot products are computed efficiently without Python for-loops.
-        # Summing the per-row products across columns yields a single value per row, collapsing the (y, x) weight matrix with the
-        # (x, 1) activation vector into a (y, 1) result vector. This new vector is then added to the bias vector to produce the
-        # pre-activation z vector for that layer.
+        # Dot product takes each weight container and multiplies it with a layer-activation container, then sums the product(s). The bias container is then added to that 
+        # result to find the pre-activation z value(s) for the layer. Looking inside the common containers (matrices and vectors): each row of a weight matrix corresponds
+        # to one neuron in the layer, and each column position in that row corresponds to one input weight for that neuron. These rows map directly to the layer’s biases 
+        # and to the layer’s activations, both typically held as vectors. During the multiplication step, NumPy reuses the same activation vector for every row of the weight 
+        # matrix, aligning each row’s columns with the vector’s entries so the per-row dot products are computed efficiently without Python for-loops. Summing the per-row 
+        # products across columns yields a single value per row, collapsing the 2 dimensional weight matrix into a 1 dimensional result vector. This new vector is then 
+        # added to the bias vector to produce the pre-activation z vector for that layer.
         z = np.dot(w, layer_activations)+b
         # Add the current layer's z vector to the list of z vectors.
         zs.append(z)
