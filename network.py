@@ -11,7 +11,7 @@ operations taking place.  It is not optimized and omits many desirable features.
 """
 
 ## import the python libraries that we need.
-# Numpy is a powerful library for numerical computing in Python, particularly for operations involving arrays (lists) and matrices (spreadsheets). It provides 
+# NumPy is a powerful library for numerical computing in Python, particularly for operations involving arrays (lists) and matrices (spreadsheets). It provides 
 # support for large, multi-dimensional arrays and matrices, along with a collection of mathematical functions to operate on these data structures efficiently.
 import numpy as np
 # The random library provides functions for generating random numbers and performing random operations.
@@ -22,48 +22,47 @@ import random
 # when they are defined inside of a class. 'object' is required to be passed as a parameter for Python 2 but is optional in 3.
 # Network is the name of our class but it could be named anything.
 class Network(object):
-    # The __init__ method is automatically called to initialize the object's attributes whenever you create a new object of the class.
-    # 'self' is an arbitrary name that refers to the specific object of the class and is the first parameter of 
-    # any method in the class. It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an ordinary parameter name 
-    # that the author chose and accepts a list argument as instructions for how to build the Neural Network.  
+    # The __init__ method is automatically called whenever you create a new object of the class to initialize its attributes.
+    # 'self' is an arbitrary name that refers to the specific object of the class and is the first parameter of any method in the class. 
+    # It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an ordinary parameter name that the author 
+    # chose and accepts a list argument as instructions for how to build the Neural Network.  
     def __init__(self , sizes):
         # Each entry in sizes represents the amount of neurons per layer, thus the # of entries=the # of layers.
         self.num_layers = len(sizes)
         # Store the sizes list as an attribute of the network object.
         self.sizes = sizes
-        # To create the biases attribute we need to skip the first the number in the sizes list because that is the input layer and it does not 
-        # have any biases. Then we iterate through the rest of them and for each iteration we need to generate that number of random values as 
-        # biases, hold those biases in a container, and then store that container as an entry into our attribute list. After that, we move onto the
-        # next iteration and repeat this process until the list is complete. We skip the input layer with sizes[1:]. We iterate with a for loop
-        # where the y variable assumes the number of neurons for the layer. Since there is only a single bias for each neuron, y is paired with 
-        # a 1 to set the dimensions of the container. NumPy accepts these dimensions and uses its randn library to build the container with random
-        # biases drawn from a standard normal distribution. This operation occurs within list brackets to store these bias containers. Most often 
-        # these containers are vectors, but they can also be scalars.
+        # To create the biases attribute we need to skip the first the number in the sizes list because that is the input layer which contains 
+        # the data we're using to train our network and does not hold any biases. Then we iterate through the rest of them and for each iteration 
+        # we need to generate that number of random values as biases, hold those biases in a container, and then store that container as an entry 
+        # into our attribute list. After that, we move onto the next iteration and repeat this process until the list is complete. We skip the input 
+        # layer with sizes[1:]. We iterate with a for loop where the y variable assumes the number of neurons for the layer. Since there is only a 
+        # single bias for each neuron, y is paired with a 1 to set the width of the container. NumPy accepts these dimensions and uses its randn 
+        # library to build the container with random biases between 0 and 1 drawn from a standard normal distribution. This loop occurs within 
+        # list brackets to store the bias containers. Most often these containers are vectors, but they can also be scalars.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         # The container used to store a layer of weights can also be either a scalar or vector, but is most commonly a matrix. To create the weights 
         # attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for loop 
-        # to form pairs based on the index positions of separate lists. The lists we are drawing from sizes[:-1] and sizes[1:] slice the end and beginning
+        # to form pairs based on the index positions of separate lists. The lists we are drawing from, sizes[:-1] and sizes[1:], slice the end and beginning
         # off the sizes list respectively. This offsets the index positions of each list by one layer. The x and y variables assume the values of the 
-        # indexed pair during every pass of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in 
-        # the list with the end sliced off and vice versa for y. Given that the values in the lists represent the number of neurons per layer, and since
-        # the number of weights per neuron in the current layer is determined by the number of neurons in the previous layer we need to reverse the order
-        # of the variables when passing them to NumPy's randn function. Doing so ensures that in a resulting container the # of rows, y, = the number of 
-        # current layer neurons and the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has provided the 
-        # values needed to create a weight container for every layer in the network. This operation occurs within list brackets storing the weight 
-        # containters to form the weights attribute list.
+        # indexed pair during every pass of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in the 
+        # list with the end sliced off and vice versa for y. Given that the values in the lists represent the number of neurons per layer, and since the 
+        # number of weights per neuron in the current layer is determined by the number of neurons in the previous layer we need to reverse the order of the 
+        # variables when passing them to NumPy's randn function so that in the resulting container the # of rows, y, = the number of current layer neurons and 
+        # the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has provided the values needed to create a weight 
+        # container for every layer in the network that receives signals from a previous layer. This loop is written in brackets to form the weights attribute list.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
-# Define an activation function to introduce non-linearity to the output of our neurons so that our Network can differentiate between them to identify patterns
+# Define an activation function to introduce non-linearity to the output signal of our neurons so that our Network can differentiate between them to identify patterns
 # in the data and learn from them. Here we use the sigmoid formula which contains the mathematical constant e '.exp' a number that has desirable properties such 
-# as a smooth curve and a simple derivative to help our network learn. z is the pre-activation value, the linear combination of: inputs, weights, activations, and 
-# bias. For a layer with a single neuron z is a scalar; for a layer of multiple neurons it's a vector. e has an exponent of -z, which means that as z becomes more 
-# positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. 
-# Adding 1 to the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a
-# probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely resulting in a smooth S-shaped 
-# curve with the x axis as z and the y axis as the output of the sigmoid function.
+# as a smooth curve and a simple derivative to help our network learn. z is the variable name of the container used to hold the pre-activation value(s), the linear 
+# combination of: inputs, weights, activations, and bias. For a layer with a single neuron z is a scalar; for a layer of multiple neurons it's a vector. e has an 
+# exponent of -z, which means that as z becomes more positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e 
+# to the -z becomes larger, approaching infinity. Adding 1 to the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid 
+# function between 0 and 1; interpretable as a probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very 
+# likely resulting in a smooth S-shaped curve with the x axis as z and the y axis as the output of the sigmoid function.
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
@@ -77,7 +76,7 @@ def sigmoid(z):
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-# The cost function derivative provides the starting error signal for backpropagation by subtracting the network's output activation(s) by the target value(s).
+# The cost derivative provides the starting error signal for backpropagation by subtracting the network's output activation(s) by the target value(s).
 def cost_derivative (self , output_activations , target_values):
     return (output_activations - target_values)
 
