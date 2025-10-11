@@ -32,8 +32,8 @@ class Network(object):
         # Store the sizes list as an attribute of the network object.
         self.sizes = sizes
         # To create the biases attribute we need to skip the first the number in the sizes list because that is the input layer which contains 
-        # the data we're using to train our network and does not hold any biases. Then we iterate through the rest of them and for each iteration 
-        # we need to generate that number of random values as biases, hold those biases in a container, and then store that container as an entry 
+        # the data we're using to train our network and does not hold any biases. Then we iterate through the rest of the numbers and for each iteration 
+        # we need to generate that amount of random values as biases, hold those biases in a container, and then store that container as an entry 
         # into our attribute list. After that, we move onto the next iteration and repeat this process until the list is complete. We skip the input 
         # layer with sizes[1:]. We iterate with a for loop where the y variable assumes the number of neurons for the layer. Since there is only a 
         # single bias for each neuron, y is paired with a 1 to set the width of the container. NumPy accepts these dimensions and uses its randn 
@@ -49,30 +49,32 @@ class Network(object):
         # number of weights per neuron in the current layer is determined by the number of neurons in the previous layer we need to reverse the order of the 
         # variables when passing them to NumPy's randn function so that in the resulting container the # of rows, y, = the number of current layer neurons and 
         # the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has provided the values needed to create a weight 
-        # container for every layer in the network that receives signals from a previous layer. This loop is written in brackets to form the weights attribute list.
+        # container for every layer in the network that receives signals from a previous layer, which is all but the input layer. This loop is written 
+        # in brackets to form the weights attribute list.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
-# Define an activation function to introduce non-linearity to the output signal of our neurons so that our Network can differentiate between them to identify patterns
-# in the data and learn from them. Here we use the sigmoid formula which contains the mathematical constant e '.exp' a number that has desirable properties such 
-# as a smooth curve and a simple derivative to help our network learn. z is the variable name of the container used to hold the pre-activation value(s), the linear 
-# combination of: inputs, weights, activations, and bias. For a layer with a single neuron z is a scalar; for a layer of multiple neurons it's a vector. e has an 
-# exponent of -z, which means that as z becomes more positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e 
-# to the -z becomes larger, approaching infinity. Adding 1 to the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid 
-# function between 0 and 1; interpretable as a probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very 
-# likely resulting in a smooth S-shaped curve with the x axis as z and the y axis as the output of the sigmoid function.
+# Define an activation function to introduce non-linearity to the output signals of our neurons so that our Network can differentiate between them to identify patterns
+# in the data to learn from. Here we use the sigmoid formula which contains the mathematical constant e (.exp). e is a number that has desirable properties such as a 
+# smooth curve, allowing for differentiation, and a simple derivative that is easy for us to compute in a network of calculations. z is the variable name of the container 
+# used to hold the pre-activation value(s), the linear combination of: inputs, weights, activations, and bias. For a layer with a single neuron z is a scalar; for a layer 
+# of multiple neurons it's a vector. e has an exponent of -z, which means that as z becomes more positive, e to the -z becomes smaller, approaching zero but never reaching it. 
+# As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to the denominator ensures that it is always larger than the numerator which keeps the 
+# output of the sigmoid function between 0 and 1; interpretable as a probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, and an output 
+# near 1 is very likely resulting in a smooth S-shaped curve with the x axis as z and the y axis as the output of the sigmoid function.
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
 # Define a function to calculate the derivative of the sigmoid to help the network learn from its mistakes. The calculation is as simple as multiplying the sigmoid 
-# function by 1 minus itself because of e's unique mathematical properties. The result is a measure of how sensitive the output of the sigmoid function is to changes
-# in its input (z). When the network outputs a mistake, the amount of error is measured and sent backwards through the network via a series of calculations in a process
-# called backpropagation. The calculations act as instructions for the neurons on how to adjust their parameters closer to a value that has less error. The derivative 
-# of the sigmoid calculation helps the neurons carry those instructions through the sigmoid transformation. If we were to graph the derivative of the sigmoid function,
-# we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. This 
-# means that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
+# function by 1 minus itself. The result is a measure of how sensitive the output of the sigmoid function is to changes in its input (z). When the network outputs a 
+# mistake, the amount of error is measured then the derivative of the sigmoid calculation carries that error signal back through the activation function of the output
+# layer. From there a chain of interdependent calculations transmit error information backward through the network, providing each neuron with precise instructions 
+# on how to adjust its parameters to reduce overall cost, thus inducing "learning". This process is known as backpropagation. This sigmoid prime function is used every 
+# time a layer in the network needs to pass the error signal backward through its sigmoid activation function. If we were to graph the derivative of the sigmoid function, 
+# we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. This means 
+# that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
