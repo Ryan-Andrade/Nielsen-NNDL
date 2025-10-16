@@ -25,14 +25,14 @@ class Network(object):
     # The __init__ method is automatically called whenever you create a new object of the class to initialize its attributes.
     # 'self' is an arbitrary name that refers to the specific object of the class and is the first parameter of any method in the class. 
     # It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an ordinary parameter name that the author 
-    # chose and accepts a list argument as instructions for how to build the Neural Network.  
+    # chose and accepts a list of numbers as instructions for how to build the Neural Network.  
     def __init__(self , sizes):
         # Each entry in sizes represents the amount of neurons per layer, thus the # of entries=the # of layers.
         self.num_layers = len(sizes)
         # Store the sizes list as an attribute of the network object.
         self.sizes = sizes
         # To create the biases attribute we need to skip the first the number in the sizes list because that is the input layer which contains 
-        # the data we're using to train our network and does not hold any biases. Then we iterate through the rest of the numbers and for each iteration 
+        # the data we're using to train our network and does not hold any biases. We then iterate through the rest of the numbers and for each iteration 
         # we need to generate that amount of random values as biases, hold those biases in a container, and then store that container as an entry 
         # into our attribute list. After that, we move onto the next iteration and repeat this process until the list is complete. We skip the input 
         # layer with sizes[1:]. We iterate with a for loop where the y variable assumes the number of neurons for the layer. Since there is only a 
@@ -69,26 +69,32 @@ def sigmoid(z):
 
 # Define a function to calculate the derivative of the sigmoid to help the network learn from its mistakes. The calculation is as simple as multiplying the sigmoid 
 # function by 1 minus itself. The result is a measure of how sensitive the output of the sigmoid function is to changes in its input (z). When the network outputs a 
-# mistake, the amount of error is measured then the derivative of the sigmoid calculation carries that error signal back through the activation function of the output
-# layer. From there a chain of interdependent calculations transmit error information backward through the network, providing each neuron with precise instructions 
+# mistake, the direction and slope of it are measured, then carried back through the activation function of the output layer by the derivative of the sigmoid calculation. 
+# From there a chain of interdependent calculations transmit error information backward through the rest of the network, providing each neuron with precise instructions 
 # on how to adjust its parameters to reduce overall cost, thus inducing "learning". This process is known as backpropagation. This sigmoid prime function is used every 
-# time a layer in the network needs to pass the error signal backward through its sigmoid activation function. If we were to graph the derivative of the sigmoid function, 
-# we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. This means 
-# that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
+# time a layer in the network needs to pass the error signal backward through its sigmoid activation function. If we were to graph the derivative of the sigmoid function
+# (aka sigmoid prime), we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative 
+# infinity. This means that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-# The cost derivative provides the starting error signal for backpropagation by subtracting the network's output activation(s) by the target value(s).
+# Define a cost derivative function to calculate the error gradient, which is the direction (+/-) and slope of the cost function, the distance between the output activation(s) 
+# and their target value(s). This starting measurement of backpropagation is calculated by subtracting Network's output activation(s) by its target value(s). The error gradient 
+# can be viewed in both parameter space (weights & biases) or activation space (pre-activations or in this case output activations). Parameter space defines the shape of Network's 
+# cost function whereas activation space defines the flow of data through Network. This demonstrates that the activations are the "behavior" of the network, and the parameters are 
+# the "knobs" we can turn to change that behavior. Since there are so many knobs the shape of the cost function has high dimensionality so as we move backward through the layers we
+# calculate the local gradient of each activation to find the instruction on how to turn that knob to reduce its individual cost expecting that on average most knobs will be turned 
+# to a point of lower cost but knowing that not every knob will.
 def cost_derivative (self , output_activations , target_values):
     return (output_activations - target_values)
 
 # Define a function to compute the gradients of the cost function with respect to each weight and bias. These slopes indicate how each parameter should be adjusted to 
 # reduce their individual error and thereby improve the network's accuracy in total.
 def compute_gradients (self, input_layer, target_values):
-    # Create lists of containers with zeros in the same shapes as the network’s biases and weights attributes. The goal of this entire function is to fill these 
-    # containers with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies of 
-    # the lists of containers storing the network's parameters we can iteratively manipulate the attributes of the actual network but store the resulting 
-    # calculations in the lists of empty containers thereby creating a one to one alignment between the network's parameters and their corresponding gradients.
+    # Create lists of containers with zeros in the same shapes as Network’s biases and weights attributes. The goal of this entire function is to fill these 
+    # containers with gradient values after measuring the cost of one training example; assuming that Network output an error. By creating blank copies of the 
+    # lists of containers storing Network's parameters we can iteratively manipulate the actual attributes of Network but store the resulting calculations with 
+    # these variables thereby creating a one to one alignment between Network's parameters and the calculated gradients.
     example_b_grads = [np.zeros(b.shape) for b in self.biases]
     example_w_grads = [np.zeros(w.shape) for w in self.weights]
     ## This is the beginning of the forward pass. 
@@ -100,7 +106,7 @@ def compute_gradients (self, input_layer, target_values):
     network_activations = [input_layer]
     # This list will store all the z containers.
     zs = []
-    # This is the primary for loop that iterates through the network's attributes to compute the activations for each layer. Zip takes the index positions from the lists
+    # This is the primary for loop that iterates through Network's attributes to compute the activations for each layer. Zip takes the index positions from the lists
     # of biases & weights attributes and iteratively combines them to form pairs of a bias container and a weight container whose values can be transformed together in 
     # one operation. b and w assume the values of their respective container in the new pair.
     for b, w in zip(self.biases , self.weights):
