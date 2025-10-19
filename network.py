@@ -3,7 +3,7 @@ network.py
 ~~~~~~~~~~
 
 A module to implement the stochastic gradient descent learning algorithm for a feedforward neural network. Gradients are calculated using backpropagation. Note that I have 
-focused on keeping the code simple and curating detailed comments so one with a bit of background knowledge can understand the operations taking place.  It is not optimized 
+focused on keeping the code simple and curating detailed comments so one with a bit of background knowledge can understand the operations taking place. It is not optimized 
 and omits many desirable features. 
 
 """
@@ -19,42 +19,38 @@ import random
 # other characteristics as attributes. They also hold functions which are called methods when they are defined inside of a class. Network is the name of our blueprint and 
 # although it's descriptive, a class can be named anything. 'object' is required to be written as an argumentt in Python 2 but is optional in 3. 
 class Network(object):
-    # Whenever you create a new object, the __init__ method is automatically called to initialize it's attributes. 'self' is an arbitrary name that refers to the specific 
-    # object of the class and is the first argument of any method in the class. It could be named anything, but 'self' is the widely accepted convention. 'sizes' is an 
-    # ordinary argument name that the author chose and accepts a list of numbers as instructions for how to build the Neural Network.  
+    # Whenever you create a new object, the __init__ method is automatically called to initialize it's attributes. 'self' is an arbitrary but widely accepted naming 
+    # convention used to refer to the specific object being called upon and is the first argument of any method in the class. 'sizes' is an ordinary argument name that the 
+    # author chose and accepts a list of numbers as instructions for how to build the Neural Network.  
     def __init__(self , sizes):
-        # Store the sizes list as an attribute of this network so when needed we can reference the number of neurons per layer later directly from the object rather than 
-        # having to rely on external variables.
+        # Store the sizes list as an attribute of this network so when needed we can reference the number of its neurons per layer later directly from the object rather 
+        # than having to rely on an external variable.
         self.sizes = sizes
-        # Each entry in sizes represents the amount of neurons per layer, thus the # of entries=the # of layers. Storing this info as an attribute allows us to reference it
-        # later when we need to iterate through the layers of the network.
+        # Store the length of the sizes list as an attribute so that we can use it to reference the number of layers in the network.
         self.num_layers = len(sizes)
         # To create the biases attribute we need to exclude the first number from the sizes list and iterate over the rest of it. The first number in sizes represents the 
-        # input layer which holds the data we want our network to process, not biases. For each iteration over the rest of sizes we need to generate that number of random 
-        # values as biases and hold those biases in a container. Once the loop has completed we will have a list of bias containers that our network can store as its 
-        # attribute. We skip the input layer with sizes[1:]. We iterate with a for loop where the y variable assumes the number of neurons for the layer. Since there is 
-        # only a single bias for each neuron, y is paired with a 1 to set the width of the container. NumPy accepts these dimensions and uses its randn library to build the
-        # container with random biases between 0 and 1 drawn from a standard normal distribution. This loop occurs within list brackets to store the bias containers. Most 
-        # often these containers are vectors, but they can also be scalars.
+        # input layer which holds the data we want our network to process, not biases. For each iteration after the input layer we need to generate that number of random 
+        # values as biases and hold those biases in a vector. Once the loop has completed, we will have a list of bias vectors that our network can store as its attribute. 
+        # sizes[1:] creates a new list that copies every entry from sizes after the first one. The for loop with y as the number of neurons per layer iterates over that 
+        # list. NumPy accepts arguments y, 1 to create a column vector and uses its randn library to fill it with y random biases drawn from a standard normal distribution. The operaton occurs within list brackets to store the bias vectors.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        # The container used to store a layer of weights can also be either a scalar or vector, but is most commonly a matrix. To create the weights attribute we need to 
-        # model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for loop to form pairs based on the index 
-        # positions of separate lists. The lists we are drawing from, sizes[:-1] and sizes[1:], slice the end and beginning off the sizes list respectively. This offsets 
-        # the index positions of each list by one layer. The x and y variables assume the values of the indexed pair during every pass of the for loop. The order of the 
-        # variables map to the order of the lists in zip, so x becomes the values in the list with the end sliced off and vice versa for y. Given that the values in the 
-        # lists represent the number of neurons per layer, and since the number of weights per neuron in the current layer is determined by the number of neurons in the 
-        # previous layer we need to reverse the order of the variables when passing them to NumPy's randn function so that in the resulting container the # of rows, y, = 
-        # the number of current layer neurons and the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has provided the values
-        # needed to create a weight container for every layer in the network that receives signals from a previous layer, which is all but the input layer. This loop is 
-        # written in brackets to form the weights attribute list.
+        # To create the weights attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for 
+        # loop to form pairs based on the index positions of separate lists. The lists we are drawing from, sizes[:-1] and sizes[1:], slice the end and beginning off the 
+        # sizes list respectively. This offsets the index positions of each list by one layer. The x and y variables assume the values of the indexed pair during every pass
+        # of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in the list with the end sliced off and vice versa for y.
+        # Given that the values in the lists represent the number of neurons per layer, and since the number of weights per neuron in the current layer is determined by the
+        # number of neurons in the previous layer we need to reverse the order of the variables when passing them to NumPy's randn function so that in the resulting matrix 
+        # the # of rows, y, = the number of current layer neurons and the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has
+        # provided the values needed to create a weight container for every layer in the network that receives signals from a previous layer, which is all but the input 
+        # layer. This loop is written in brackets to form the weights attribute list.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
 
 # Define an activation function to introduce non-linearity to the output signals of our neurons so that our Network can differentiate between them to identify patterns
-# in the data to learn from. Here we use the sigmoid formula which contains the mathematical constant e (.exp). e is a number that has desirable properties such as a 
-# smooth curve, allowing for differentiation, and a simple derivative that is easy for us to compute in a network of calculations. z is the variable name of the container 
+# in the data to learn from. Here we use the sigmoid formula which contains the natural exponential base e (.exp). e is a number that models continuous change and thus has  
+# a smooth curve, allowing for differentiation, and a simple derivative that is easy for us to compute in a network of calculations. z is the variable name of the container 
 # used to hold the pre-activation value(s), the linear combination of: inputs, weights, activations, and bias. For a layer with a single neuron z is a scalar; for a layer 
 # of multiple neurons it's a vector. e has an exponent of -z, which means that as z becomes more positive, e to the -z becomes smaller, approaching zero but never reaching 
 # it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to the denominator ensures that it is always larger than the numerator which 
@@ -74,23 +70,23 @@ def sigmoid(z):
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-# Define a cost derivative function to calculate the error gradient, which is the direction (+/-) and slope of the cost function, the distance between the output 
-# activation(s) and their target value(s). This starting measurement of backpropagation is calculated by subtracting the network's output activation(s) by its target value(s). 
-# The error gradient can be viewed in both parameter space (weights & biases) or activation space (pre-activations or in this case output activations). Parameter space 
-# defines the shape of Network's cost function whereas activation space defines the flow of data through the network. This demonstrates that the activations are the "behavior" 
-# of the network, and the parameters are the "knobs" we can turn to change that behavior. Since there are so many knobs the shape of the cost function has high 
-# dimensionality so as we move backward through the layers we calculate the local gradient of each activation to find the instruction on how to turn that knob to reduce its
-# individual cost expecting that on average most knobs will be turned to a point of lower cost but knowing that not every knob will.
+# Define a cost derivative function to calculate the error gradient. The error gradient is the direction (+/-) and slope of the cost function: the distance between the 
+# output activation(s) and their target value(s) calculated using the mean squared error. The cost derivative simplifies to subtracting the network's output activation(s) 
+# by its target value(s).
 def cost_derivative (self , output_activations , target_values):
     return (output_activations - target_values)
 
-# Define a function to compute the gradients of the cost function with respect to each weight and bias. These slopes indicate how each parameter should be adjusted to 
-# reduce their individual error and thereby improve the network's accuracy in total.
+# Define a function to compute the error gradient of the cost function with respect to each weight and bias. The error gradient can be viewed in both parameter space
+# (weights & biases) and activation space (pre-activations & output activations). Parameter space defines the shape of the network's cost function whereas activation space 
+# defines the flow of data through the network. This reveals that the activations are the "behavior" of the network, and the parameters are the "knobs" we can turn to 
+# tune that behavior. This also shows that the number of dimensions that the cost surface exists within corresponds directly to the number of parameters in the network. 
+# Thus in order to determine how each individual parameter can reduce the global cost we must calculate its local error gradient to discover which direction and how much to
+# turn that knob. However, in practice, due to the complexity of the surface, a parameter may plateu or even increase it cost slightly on a given update.
 def compute_gradients (self, input_layer, target_values):
-    # Create lists of containers with zeros in the same shapes as the network’s biases and weights attributes. The goal of this entire function is to fill these 
-    # containers with gradient values after measuring the cost of one training example; assuming that Network output an error. By creating blank copies of the 
-    # lists of containers storing Network's parameters we can iteratively manipulate the actual attributes of Network but store the resulting calculations with 
-    # these variables thereby creating a one to one alignment between the network's parameters and the calculated gradients.
+    # Create lists of containers with zeros in the same shapes as the network’s biases and weights attributes. The goal of this entire function is to fill these containers 
+    # with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies of the lists of containers 
+    # storing the network's parameters we can iteratively manipulate the actual attributes of Network but store the resulting calculations with these variables thereby 
+    # creating a one to one alignment between the network's parameters and the calculated gradients.
     example_b_grads = [np.zeros(b.shape) for b in self.biases]
     example_w_grads = [np.zeros(w.shape) for w in self.weights]
     ## This is the beginning of the forward pass. 
