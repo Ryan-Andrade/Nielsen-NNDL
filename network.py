@@ -17,14 +17,14 @@ import random
 
 # In Python, "class" defines a new blueprint for creating "objects" (neural networks in our case, but it could be anything). Objects store data such as weights, biases and 
 # other characteristics as attributes. They also hold functions which are called methods when they are defined inside of a class. Network is the name of our blueprint and 
-# although it's descriptive, a class can be named anything. 'object' is required to be written as an argumentt in Python 2 but is optional in 3. 
+# although it's descriptive, a class can be named anything. 'object' is required to be written as an argument in Python 2 but is optional in 3. 
 class Network(object):
     # Whenever you create a new object, the __init__ method is automatically called to initialize it's attributes. 'self' is an arbitrary but widely accepted naming 
     # convention used to refer to the specific object being called upon and is the first argument of any method in the class. 'sizes' is an ordinary argument name that the 
     # author chose and accepts a list of numbers as instructions for how to build the Neural Network.  
     def __init__(self , sizes):
-        # Store the sizes list as an attribute of this network so when needed we can reference the number of its neurons per layer later directly from the object rather 
-        # than having to rely on an external variable.
+        # Store the sizes list as an attribute of this network so when needed we can reference the number of its neurons per layer directly from the object rather than 
+        # having to rely on an external variable.
         self.sizes = sizes
         # Store the length of the sizes list as an attribute so that we can use it to reference the number of layers in the network.
         self.num_layers = len(sizes)
@@ -32,7 +32,8 @@ class Network(object):
         # input layer which holds the data we want our network to process, not biases. For each iteration after the input layer we need to generate that number of random 
         # values as biases and hold those biases in a vector. Once the loop has completed, we will have a list of bias vectors that our network can store as its attribute. 
         # sizes[1:] creates a new list that copies every entry from sizes after the first one. The for loop with y as the number of neurons per layer iterates over that 
-        # list. NumPy accepts arguments y, 1 to create a column vector and uses its randn library to fill it with y random biases drawn from a standard normal distribution. The operaton occurs within list brackets to store the bias vectors.
+        # list. NumPy accepts arguments y, 1 to create a column vector and uses its randn library to fill it with y random biases drawn from a standard normal distribution. 
+        # The operaton occurs within list brackets to store the bias vectors.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         # To create the weights attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for 
         # loop to form pairs based on the index positions of separate lists. The lists we are drawing from, sizes[:-1] and sizes[1:], slice the end and beginning off the 
@@ -50,12 +51,12 @@ net = Network([2, 3, 1])
 
 # Define an activation function to introduce non-linearity to the output signals of our neurons so that our Network can differentiate between them to identify patterns
 # in the data to learn from. Here we use the sigmoid formula which contains the natural exponential base e (.exp). e is a number that models continuous change and thus has  
-# a smooth curve, allowing for differentiation, and a simple derivative that is easy for us to compute in a network of calculations. z is the variable name of the container 
-# used to hold the pre-activation value(s), the linear combination of: inputs, weights, activations, and bias. For a layer with a single neuron z is a scalar; for a layer 
-# of multiple neurons it's a vector. e has an exponent of -z, which means that as z becomes more positive, e to the -z becomes smaller, approaching zero but never reaching 
-# it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to the denominator ensures that it is always larger than the numerator which 
-# keeps the output of the sigmoid function between 0 and 1; interpretable as a probability. This means an output near .50 is uncertain, an output near 0 is very unlikely, 
-# and an output near 1 is very likely resulting in a smooth S-shaped curve with the x axis as z and the y axis as the output of the sigmoid function.
+# a smooth curve allowing for differentiation, and a simple derivative that is easy for us to compute in a network of calculations. z is the variable name of the vector 
+# used to hold the pre-activation value(s), the linear combination of: inputs, weights, activations, and bias. e has an exponent of -z, which means that as z becomes more 
+# positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to 
+# the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a probability. This
+# means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely resulting in a smooth S-shaped curve with the x axis as z 
+# and the y axis as the output of the sigmoid function.
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
@@ -83,24 +84,23 @@ def cost_derivative (self , output_activations , target_values):
 # Thus in order to determine how each individual parameter can reduce the global cost we must calculate its local error gradient to discover which direction and how much to
 # turn that knob. However, in practice, due to the complexity of the surface, a parameter may plateu or even increase it cost slightly on a given update.
 def compute_gradients (self, input_layer, target_values):
-    # Create lists of containers with zeros in the same shapes as the network’s biases and weights attributes. The goal of this entire function is to fill these containers 
-    # with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies of the lists of containers 
-    # storing the network's parameters we can iteratively manipulate the actual attributes of Network but store the resulting calculations with these variables thereby 
-    # creating a one to one alignment between the network's parameters and the calculated gradients.
+    # Create lists in the same shapes as the network’s biases and weights attributes but fill the arrays with zeros. The goal of this entire function is to replace the 
+    # zeros with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies of the lists of 
+    # arrays storing the network's parameters we can iteratively manipulate the actual attributes of the network yet store the resulting calculations in these variables 
+    # thereby creating a one to one alignment between the network's parameters and the calculated gradients.
     example_b_grads = [np.zeros(b.shape) for b in self.biases]
     example_w_grads = [np.zeros(w.shape) for w in self.weights]
     ## This is the beginning of the forward pass. 
-    # We chose the name layer_activations because that is what we will be computing as we iterate through the lists of Network's attributes. We set it equal to the 
-    # input layer because those encoded data are what we want the network to compute into output activations and the process begins by feeding them forward to the 
-    # first hidden layer.
-    layer_activations = input_layer
-    # Create a list for the loop to store each activation layer.
+    # When this variable is called inside of the subsequent for loop it will become a placeholder for the activations of the previous layer as we iterate forward through 
+    # the network. We initialize it with the input layer since those encoded data are what we want our network to process and compute activations from. 
+    previous_layer_activations = input_layer
+    # Create a list for the loop to store each activation layer as we compute them and initialize it with the input layer.
     network_activations = [input_layer]
-    # This list will store all the z containers.
+    # Store all the z vectors in a list for us to use during back propagation.
     zs = []
     # This is the primary for loop that iterates through the network's attributes to compute the activations for each layer. Zip takes the index positions from the lists
-    # of biases & weights attributes and iteratively combines them to form pairs of a bias container and a weight container whose values can be transformed together in 
-    # one operation. b and w assume the values of their respective container in the new pair.
+    # of arrays containing the biases & weights attributes and iteratively combines them to form pairs of a bias and a weight array whose values can be transformed together 
+    # in one line of code. b and w assume the values of their respective container in the new pair.
     for b, w in zip(self.biases , self.weights):
         # Dot product takes each weight container and multiplies it with a layer-activation container, then sums the product(s). The bias container is then added to that 
         # result to find the pre-activation z value(s) for the layer. Looking inside the common containers (matrices and vectors): each row of a weight matrix corresponds
@@ -109,13 +109,14 @@ def compute_gradients (self, input_layer, target_values):
         # matrix, aligning each row’s columns with the vector’s entries so the per-row dot products are computed efficiently without Python for-loops. Summing the per-row 
         # products across columns yields a single value per row, collapsing the 2 dimensional weight matrix into a 1 dimensional result vector. This new vector is then 
         # added to the bias vector to produce the pre-activation z vector for that layer.
-        z = np.dot(w, layer_activations)+b
+        z = np.dot(w, previous_layer_activations)+b
         # Add the current layer's z vector to the list of z vectors.
         zs.append(z)
         # The sigmoid function is then applied to each entry in the z vector to produce the activation vector for the layer.
-        layer_activations = sigmoid (z)
+        current_layer_activations = sigmoid (z)
         # Add the current layer's activation vector to the list of activation vectors for the network.
-        network_activations.append(layer_activations)
+        network_activations.append(current_layer_activations)
+        previous_layer_activations = current_layer_activations
     ## This is the beginning of the backward pass.
     # Find the error at the output layer (activations[-1]) by computing the product of two terms:
     #   1. The derivative of the cost function (cost_derivative) which is simply the activation - the target value. This tells us what direction (+/-) and how much to
