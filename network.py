@@ -19,7 +19,7 @@ import random
 # other characteristics as attributes. They also hold functions which are called methods when they are defined inside of a class. Network is the name of our blueprint and 
 # although it's descriptive, a class can be named anything. 'object' is required to be written as an argument in Python 2 but is optional in 3. 
 class Network(object):
-    # Whenever you create a new object, the __init__ method is automatically called to initialize it's attributes. 'self' is an arbitrary but widely accepted naming 
+    # Whenever you create a new object, the __init__ method is automatically called to initialize its attributes. 'self' is an arbitrary but widely accepted naming 
     # convention used to refer to the specific object being called upon and is the first argument of any method in the class. 'sizes' is an ordinary argument name that the 
     # author chose and accepts a list of numbers as instructions for how to build the Neural Network.  
     def __init__(self , sizes):
@@ -35,15 +35,12 @@ class Network(object):
         # list. NumPy accepts arguments y, 1 to create a column vector and uses its randn library to fill it with y random biases drawn from a standard normal distribution. 
         # The operaton occurs within list brackets to store the bias vectors.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        # To create the weights attribute we need to model the connections between every ordered pair of layers in the network, so we use an iterator called zip in our for 
-        # loop to form pairs based on the index positions of separate lists. The lists we are drawing from, sizes[:-1] and sizes[1:], slice the end and beginning off the 
-        # sizes list respectively. This offsets the index positions of each list by one layer. The x and y variables assume the values of the indexed pair during every pass
-        # of the for loop. The order of the variables map to the order of the lists in zip, so x becomes the values in the list with the end sliced off and vice versa for y.
-        # Given that the values in the lists represent the number of neurons per layer, and since the number of weights per neuron in the current layer is determined by the
-        # number of neurons in the previous layer we need to reverse the order of the variables when passing them to NumPy's randn function so that in the resulting matrix 
-        # the # of rows, y, = the number of current layer neurons and the # of columns, x, = the number of previous layer neurons. The for loop then continues until zip has
-        # provided the values needed to create a weight container for every layer in the network that receives signals from a previous layer, which is all but the input 
-        # layer. This loop is written in brackets to form the weights attribute list.
+        # To create the weights attribute we need to map the connections between every ordered pair of layers in the network. To do this we use an iterator called zip to 
+        # form pairs based on the index positions of separate lists and then iterate over the index with a for loop. The lists we are drawing from, sizes[:-1] and sizes[1:],
+        # slice the end and beginning off the sizes list respectively. This offsets the two lists so that the pair of values sharing the same index position contain the 
+        # number of neurons in the previous layer, represented by x, and the number of neurons in the current layer, represented by y. We mark the connections between two
+        # layers with weights randomly drawn from a standard normal distribution using NumPy's randn function. For a given neuron the number of weights it has is equal to x. 
+        # Therefore, our weights are organized into a matrix with y rows and x columns. The operation occurs within brackets to form the weight attribute.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
