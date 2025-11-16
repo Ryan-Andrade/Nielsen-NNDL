@@ -31,7 +31,7 @@ class Network(object):
         # To create the biases attribute we need to exclude the first number from the sizes list and iterate over the rest of it. The first number in sizes represents the 
         # input layer which holds the data we want our network to process, not biases. For each iteration after the input layer we need to generate that number of random 
         # values as biases and hold those biases in a vector. Once the loop has completed, we will have a list of bias vectors that our network can store as its attribute. 
-        # sizes[1:] creates a new list that copies every entry from sizes after the first one. The for loop with y as the number of neurons per layer iterates over that 
+        # sizes[1:] creates a new list that copies every entry from sizes after the first one. The for loop using y as the number of neurons per layer iterates over that 
         # list. NumPy accepts arguments y, 1 to create a column vector and uses its randn library to fill it with y random biases drawn from a standard normal distribution. 
         # The operaton occurs within list brackets to store the bias vectors.
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
@@ -49,10 +49,10 @@ net = Network([2, 3, 1])
 # Define an activation function to introduce non-linearity to the output signals of our neurons so that our Network can differentiate between them to identify patterns
 # in the data it can learn from. Here we use the sigmoid formula which contains the natural exponential base e (.exp). e is a number that models continuous change and thus 
 # has a smooth curve allowing for differentiation, and a simple derivative that is easy to compute in a network of calculations. z is the variable name of the vector 
-# used to hold the pre-activation value(s), the linear combination of: inputs, weights, activations, and bias. e has an exponent of -z, which means that as z becomes more 
+# used to hold the pre-activation value(s)-the linear combination of: inputs, weights, activations, and bias. e has an exponent of -z, which means that as z becomes more 
 # positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to 
 # the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a probability. This
-# means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely resulting in a smooth S-shaped curve with the x axis as z 
+# means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely; resulting in a smooth S-shaped curve with the x axis as z 
 # and the y axis as the output of the sigmoid function.
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
@@ -101,9 +101,9 @@ def compute_gradients (self, input_layer, target_values):
     for b, w in zip(self.biases , self.weights):
         # Dot product takes the weight matrix and multiplies it with the previous layer's activation vector, then sums the product(s). The bias vector is then added to 
         # that result to find the pre-activation z value(s) for the layer. Inside of this operation, NumPy reuses the same activation vector for every row of the weight 
-        # matrix, aligning each row’s columns with the vector’s entries so the per-row dot products are computed efficiently without Python for-loops. Summing the per-row 
-        # products across columns yields a single value per row, collapsing the 2 dimensional weight matrix into a 1 dimensional result vector. This new vector is then 
-        # added to the bias vector to produce the pre-activation z vector for that layer.
+        # matrix, aligning each row’s weights with the activations from the same repeated vector so that the per-row dot products are computed efficiently without Python 
+        # for-loops. Summing the per-neuron products across columns yields a single value per row, collapsing the 2 dimensional weight matrix into a 1 dimensional result 
+        # vector. This new vector is then added to the bias vector to produce the pre-activation z vector for that layer.
         z = np.dot(w, previous_layer_activations)+b
         # Add the current layer's z vector to the list of z vectors.
         zs.append(z)
@@ -114,11 +114,7 @@ def compute_gradients (self, input_layer, target_values):
         # Reset the previous layer activations variable to equal the current layer activation vector for the next iteration.
         previous_layer_activations = current_layer_activations
     ## This is the beginning of the backward pass.
-    # Find the error at the output layer (activations[-1]) by computing the product of two terms:
-    #   1. The derivative of the cost function (cost_derivative) which is simply the activation - the target value. This tells us what direction (+/-) and how much to
-    #      adjust the output activations to reduce the cost.
-    #   2. The derivative of the sigmoid function (sigmoid_prime) which measures how the output activations change as the pre-activation values (z) change.
-    # The product of these two terms gives the gradient as a scalar for a single neuron output layer, or a vector for a multi-neuron output layer.
+    # Find the error at the output layer by calculating the cost derivative and multiplying it by the derivative of the sigmoid function. 
     layer_error = self.cost_derivative(network_activations [-1], target_values) * sigmoid_prime (zs [ -1])
     # Because the bias is simply added to the weighted inputs to find the pre-activation value, it can be adjusted directly by the error value therefore we can
     # assign the layer_error vector directly to the end of the example's biases gradients list, replacing the zeros that used to be there.
