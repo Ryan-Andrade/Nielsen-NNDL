@@ -72,14 +72,14 @@ class Network(object):
     def cost_derivative (self , output_activations , target_values):
         return (output_activations - target_values)
 
-    # Define a function to compute the error gradient of the cost function with respect to each weight and bias. The error gradient can be viewed in both parameter space
-    # (weights & biases) and activation space (pre-activations & output activations). Parameter space defines the shape of the network's cost function whereas activation space 
-    # defines the flow of data through the network. Activations can be thought of as the "behavior" of the network, while the parameters are the "knobs" we can turn to tune 
-    # that behavior. The number of dimensions that the cost surface exists within corresponds directly to the number of parameters in the network. In order to determine how 
-    # each individual parameter can reduce the global cost we must calculate its local error gradient to discover which direction and how much to turn that knob. However, in 
-    # practice, due to the high dimensional shape of the surface, a parameter may plateau or even increase its cost slightly on a given update.
+    # Define a function to compute how sensitive cost is to changes in an individual weight or bias, known as that parameter's error gradient. The error gradient can be viewed 
+    # in both parameter space (weights & biases) and activation space (pre-activations & output activations). Parameter space defines the shape of the network's cost function 
+    # whereas activation space defines the flow of data through the network. Activations can be thought of as the "behavior" of the network, while the parameters are the 
+    # "knobs" we can turn to tune that behavior. The number of dimensions that the cost surface exists within corresponds directly to the number of parameters in the network. 
+    # In order to determine how each individual parameter can reduce the global cost we must calculate its local error gradient to discover which direction and how much to 
+    # turn that knob. However, in practice, due to the high dimensional shape of the surface, a parameter may plateau or even increase its cost slightly on a given update.
     def compute_gradients (self, input_layer, target_values):
-        # Create lists in the same shapes as the network’s biases and weights attributes but fill the arrays with zeros. The goal of this entire function is to replace the 
+        # Create lists in the same shapes as the network’s biases and weights attributes but fill the arrays with zeros. The goal of this entire method is to replace the 
         # zeros with gradient values after measuring the cost of one training example; assuming that the network output an error. By creating blank copies we can operate 
         # directly on the actual attributes of the network yet store the resulting calculations in these variables. This effectively creates a one to one alignment between the
         # network's parameters and calculated gradients.
