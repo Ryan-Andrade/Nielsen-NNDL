@@ -66,13 +66,13 @@ class Network(object):
         # is equal to x. Therefore, our weights are organized into a matrix with y rows and x columns. The operation occurs within brackets to form the weight attribute.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
-    # Define a cost derivative function to calculate the direction (+/-) and slope of the cost, a performance metric used to reveal the distance between the network's 
+    # Define a cost derivative method to calculate the direction (+/-) and slope of the cost, a performance metric used to reveal the distance between the network's 
     # output activations and its target values by finding the mean squared error between them. The cost derivative on the other hand tells us how sensitive the cost is to 
     # changes in the output activations and is calculated by simply subtracting the target values from the final layer's activation vector.
     def cost_derivative (self , output_activations , target_values):
         return (output_activations - target_values)
 
-    # Define a function to compute how sensitive cost is to changes in an individual weight or bias, known as that parameter's error gradient. The error gradient can be viewed 
+    # Define a method to compute how sensitive cost is to changes in an individual weight or bias, known as that parameter's error gradient. The error gradient can be viewed 
     # in both parameter space (weights & biases) and activation space (pre-activations & output activations). Parameter space defines the shape of the network's cost function 
     # whereas activation space defines the flow of data through the network. Activations can be thought of as the "behavior" of the network, while the parameters are the 
     # "knobs" we can turn to tune that behavior. The number of dimensions that the cost surface exists within corresponds directly to the number of parameters in the network. 
@@ -217,7 +217,7 @@ class Network(object):
             # During training, print the epoch.
             print ("Epoch {0} complete".format(j))
 
-    # create a function that sends an input vector 'a' through the network and returns the output vector.
+    # create a method that sends an input vector 'a' through the network and returns the output vector.
     def feedforward(self , a):
         # Iterate through the hidden and output layers in the network and pair the weight matrix with the bias vector using zip.
         # This results in a tuple of (bias_vector, weight_matrix) for each layer. 
