@@ -60,10 +60,11 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         # To create the weights attribute we need to map the connections between every ordered pair of layers in the network. To do this we use an iterator called zip to 
         # form pairs based on the index positions of separate lists and then iterate over those indexed values with a for loop. The lists we are drawing from, sizes[:-1] 
-        # and sizes[1:], slice the end and beginning off the sizes list respectively. This offsets the two lists so that the pair of values sharing the same index position 
-        # contain the number of neurons in the previous layer, represented by x, and the number of neurons in the current layer, represented by y. We mark the connections 
-        # between two layers with weights randomly drawn from a standard normal distribution using NumPy's randn function. For a given neuron the number of weights it has 
-        # is equal to x. Therefore, our weights are organized into a matrix with y rows and x columns. The operation occurs within brackets to form the weight attribute.
+        # and sizes[1:], copy the sizes list except for the last and first entry respectively. This offsets the two lists so that we can assign the pair of values sharing 
+        # the same index position the roles of x as the number of neurons in the previous layer, and y as the number of neurons in the current layer. We mark the 
+        # connections between two layers with weights randomly drawn from a standard normal distribution using NumPy's randn function. For a given neuron the number of 
+        # weights it has is equal to x. Therefore, our weights are organized into a matrix with y rows and x columns. The operation occurs within brackets to form the 
+        # weight attribute.
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
     # Define a cost derivative method to calculate the direction (+/-) and slope of the "cost" also known as "loss", a performance metric used to reveal the distance 
