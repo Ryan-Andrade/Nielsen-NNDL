@@ -15,29 +15,6 @@ import numpy as np
 # The random library provides functions for generating random numbers and performing random operations.
 import random
 
-# Define an activation function to introduce non-linearity to the output signals of our neurons so that our Network can differentiate between them to identify patterns
-# in the data it can learn from. Here we use the sigmoid formula which contains the natural exponential base e (.exp). e is a number that models continuous change and thus 
-# has a smooth curve allowing for differentiation, and a simple derivative that is easy to compute in a network of calculations. z is the variable name of the vector 
-# used to hold the pre-activation value(s)-the linear combination of: inputs, weights, activations, and bias. e has an exponent of -z, which means that as z becomes more 
-# positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to 
-# the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a probability. This
-# means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely; resulting in a smooth S-shaped curve with the x axis as z 
-# and the y axis as the output of the sigmoid function.
-def sigmoid(z):
-    return 1.0/(1.0+np.exp(-z))
-
-# Define a function to use the derivative of the sigmoid calculation as a nonlinear filter for dampening the error signal when updating model parameters after the network
-# output a mistake during training. The calculation is as simple as multiplying the sigmoid function by 1 minus itself and the result is a sensitivity measure of the 
-# sigmoid function's output to changes in its input (z). When the network outputs a mistake, the direction and slope of it are measured, this is called the error gradient.
-# After the derivative of the sigmoid is calculated it is multiplied by the error gradient to transmit the error signal to the neuron's linearly calculated parameters. This
-# begins a chain of interdependent calculations that continue transmitting error information backward through the rest of the network using the same process. At the end 
-# each neuron has precise instructions on how to adjust its parameters to reduce overall cost, thereby inducing "learning". This is known as backpropagation. This sigmoid 
-# prime function is used every time a neuron in the network needs to filter the error signal backward to its parameters. If we were to graph the derivative of the sigmoid 
-# function we would see a bell-shaped curve. That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. 
-# This means that the neuron learns the most when its output is uncertain and learns the least when its output is very certain.
-def sigmoid_prime(z):
-    return sigmoid(z)*(1-sigmoid(z))
-
 # In Python, "class" defines a new blueprint for creating "objects" (neural networks in our case, but it could be anything). Objects store data such as weights, biases and 
 # other characteristics as attributes. They also hold functions which are called methods when they are defined inside of a class. Network is the name of our blueprint and 
 # although it's descriptive, a class can be named anything. 'object' is required to be written as an argument in Python 2 but is optional in 3. 
@@ -106,7 +83,7 @@ class Network(object):
             z = np.dot(w, previous_layer_activations)+b
             # Add the current layer's z vector to the list of z vectors.
             zs.append(z)
-            # Apply the sigmoid function to the z vector to produce the activation vector for the layer.
+            # Apply the sigmoid function (defined outside of the class) to the z vector to produce the activation vector for the layer.
             current_layer_activations = sigmoid (z)
             # Add the current layer's activation vector to the list of activation vectors for the network.
             network_activations.append(current_layer_activations)
@@ -131,7 +108,7 @@ class Network(object):
             # By placing a minus sign in front of l we can iterate in reverse order, so here the variable z starts out equal to the final hidden layer z container and 
             # iterates backwards to, but not including, the input layer.
             z = zs[-l]
-            # Set a variable equal to the derivative of the sigmoid vector.
+            # Set a variable to call the derivative of the sigmoid function (defined outside the class) on the z vector.
             sp = sigmoid_prime(z)
             # Since we are moving backward through the network we need to align the weights with the errors from the layer ahead,
             # transpose the weight matrix of each layer so that the rows (neurons) become columns, and the columns (weights) becomes rows. 
@@ -226,6 +203,26 @@ class Network(object):
             # compute the activation function for the entire layer at once using numpy's dot product.
             a = sigmoid(np.dot(w, a)+b)
             return a
+
+# Define an activation function to introduce non-linearity to the output signals of our neurons so that our network can differentiate between them to identify patterns
+# in the data it can learn from. Here we use the sigmoid activation formula which contains the natural exponential base e (.exp). e is a number that models continuous 
+# change and thus has a smooth curve allowing for differentiation, and a simple derivative that is easy to compute in a network of calculations. z is the variable name of 
+# the vector used to hold the pre-activation value(s)-the linear combination of: inputs, weights, and bias. e has an exponent of -z, which means that as z becomes more 
+# positive, e to the -z becomes smaller, approaching zero but never reaching it. As z becomes more negative, e to the -z becomes larger, approaching infinity. Adding 1 to 
+# the denominator ensures that it is always larger than the numerator which keeps the output of the sigmoid function between 0 and 1; interpretable as a probability. This
+# means an output near .50 is uncertain, an output near 0 is very unlikely, and an output near 1 is very likely; resulting in a smooth S-shaped curve when the x axis is z 
+# and the y axis is the output of the sigmoid function.
+def sigmoid(z):
+    return 1.0/(1.0+np.exp(-z))
+
+# Define a function to use the derivative of the sigmoid calculation, sigmoid prime, as a nonlinear filter for dampening the error signal when updating model parameters 
+# after the network output a mistake during training. The calculation is as simple as multiplying the sigmoid function by 1 minus itself and the result is a sensitivity 
+# measure of the sigmoid function's output to changes in its input (z). After the derivative of the sigmoid is calculated it is multiplied by the error gradient to 
+# transmit the error signal to the neuron's linearly calculated parameters. If we were to graph the derivative of the sigmoid function we would see a bell-shaped curve. 
+# That curve peaks at 0.25 when z=0 and the sigmoid output is 0.5. It flattens as z approaches positive or negative infinity. This means that the neuron learns the most 
+# when its output is uncertain and learns the least when its output is very certain.
+def sigmoid_prime(z):
+    return sigmoid(z)*(1-sigmoid(z))
 
 # [2,3,1] = 3 layers. The input layer has 2 neurons, the hidden layer has 3 neurons, and the output layer has 1 neuron.  
 net = Network([2, 3, 1])
